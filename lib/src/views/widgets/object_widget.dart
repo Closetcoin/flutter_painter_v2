@@ -150,7 +150,7 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
         : MapEntry<int, ObjectDrawable>(
             0,
             TextDrawable(
-              position: Offset(0, 0),
+              position: const Offset(0, 0),
               text: '',
             ));
     return LayoutBuilder(builder: (context, constraints) {

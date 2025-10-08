@@ -117,6 +117,12 @@ class OutfitCreatorScreen extends HookConsumerWidget {
               ),
               TextButton(
                 child: Text(
+                  'Flip',
+                ),
+                onPressed: () => controller.flipSelectedImageHorizontally(),
+              ),
+              TextButton(
+                child: Text(
                   'Erase',
                   style: TextStyle(
                     color: isEraseMode ? Colors.red : null,

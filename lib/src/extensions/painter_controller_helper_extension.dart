@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import '../controllers/factories/shape_factory.dart';
 
-
 import '../controllers/painter_controller.dart';
 import '../controllers/settings/settings.dart';
 import '../controllers/drawables/drawables.dart';
@@ -318,4 +317,25 @@ extension PainterControllerHelper on PainterController {
   set scalingEnabled(bool enabled) => value = value.copyWith(
       settings: value.settings
           .copyWith(scale: value.settings.scale.copyWith(enabled: enabled)));
+
+  /// Flips the currently selected [ImageDrawable] horizontally.
+  ///
+  /// Returns `true` if the selected drawable is an [ImageDrawable] and was flipped successfully,
+  /// `false` otherwise (if no drawable is selected or if the selected drawable is not an [ImageDrawable]).
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool flipSelectedImageHorizontally() {
+    final selected = selectedObjectDrawable;
+    if (selected is ImageDrawable) {
+      replaceDrawable(
+        selected,
+        selected.copyWith(flipped: !selected.flipped),
+      );
+      return true;
+    }
+    return false;
+  }
 }
