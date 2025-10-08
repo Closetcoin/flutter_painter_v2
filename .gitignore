@@ -1,2 +1,5 @@
 # Project exclude paths
 /.dart_tool/
+
+# FVM Version Cache
+.fvm/
