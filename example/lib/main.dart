@@ -60,155 +60,185 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.freeStyleSettings.strokeWidth,
     );
+    final isImageSelected = useListenableSelector(
+      controller,
+      () => controller.selectedObjectDrawable is ImageDrawable,
+    );
 
     final imagePickerNotifier = ref.read(appImagePickerProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Outfit Creator')),
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-            ),
-            child: _ExpandedSquare(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  painterSide.value = min(
-                    constraints.maxWidth,
-                    constraints.maxHeight,
-                  );
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+              ),
+              child: _ExpandedSquare(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    painterSide.value = min(
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    );
 
-                  return SizedBox.square(
-                    dimension: painterSide.value,
-                    child: FlutterPainter(controller: controller),
-                  );
-                },
+                    return SizedBox.square(
+                      dimension: painterSide.value,
+                      child: FlutterPainter(controller: controller),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton(
-                    onPressed: canUndo ? () => controller.undo() : null,
-                    child: Text(
-                      'Undo',
-                      style: TextStyle(
-                        color: canUndo ? Colors.black : Colors.grey,
-                      ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: canUndo ? () => controller.undo() : null,
+                  child: Text('Undo'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: canRedo ? () => controller.redo() : null,
+                  child: Text('Redo'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: isImageSelected
+                      ? () => controller.flipSelectedImageHorizontally()
+                      : null,
+                  child: Text('Flip'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: isImageSelected
+                      ? () => controller.sendSelectedBackward()
+                      : null,
+                  child: Text('Send Backward'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: isImageSelected
+                      ? () => controller.sendSelectedForward()
+                      : null,
+                  child: Text('Send Forward'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: isImageSelected
+                      ? () => controller.sendSelectedToBack()
+                      : null,
+                  child: Text('Send to Back'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: isImageSelected
+                      ? () => controller.sendSelectedToFront()
+                      : null,
+                  child: Text('Send to Front'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  child: Text(
+                    'Erase',
+                    style: TextStyle(
+                      color: isEraseMode ? Colors.red : null,
                     ),
                   ),
+                  onPressed: () => controller.freeStyleMode =
+                      isEraseMode ? FreeStyleMode.none : FreeStyleMode.erase,
+                ),
+              ],
+            ),
+            if (isEraseMode) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Text('Stroke Width'),
                   const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: canRedo ? () => controller.redo() : null,
-                    child: Text(
-                      'Redo',
-                      style: TextStyle(
-                        color: canRedo ? Colors.black : Colors.grey,
-                      ),
+                  Expanded(
+                    child: Slider.adaptive(
+                      min: 2,
+                      max: 25,
+                      value: strokeWidth,
+                      onChanged: (value) => controller.freeStyleSettings =
+                          controller.freeStyleSettings
+                              .copyWith(strokeWidth: value),
                     ),
                   ),
                 ],
               ),
-              TextButton(
-                child: Text(
-                  'Flip',
-                ),
-                onPressed: () => controller.flipSelectedImageHorizontally(),
-              ),
-              TextButton(
-                child: Text(
-                  'Erase',
-                  style: TextStyle(
-                    color: isEraseMode ? Colors.red : null,
-                  ),
-                ),
-                onPressed: () => controller.freeStyleMode =
-                    isEraseMode ? FreeStyleMode.none : FreeStyleMode.erase,
-              ),
             ],
-          ),
-          if (isEraseMode) ...[
-            const SizedBox(height: 16),
-            Row(
+            const Spacer(),
+            Column(
               children: [
-                const Text('Stroke Width'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Slider.adaptive(
-                    min: 2,
-                    max: 25,
-                    value: strokeWidth,
-                    onChanged: (value) => controller.freeStyleSettings =
-                        controller.freeStyleSettings
-                            .copyWith(strokeWidth: value),
+                TextButton(
+                  child: const Text('Add photo'),
+                  onPressed: () async {
+                    final pickedImage =
+                        await imagePickerNotifier.pickFromGallery();
+                    if (pickedImage != null) {
+                      final image = await pickedImage.toUiImage();
+
+                      controller.addImage(
+                        image,
+                        Size(
+                          min(painterSide.value, image.width.toDouble()),
+                          min(painterSide.value, image.height.toDouble()),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: isRendering.value ? Colors.grey : null,
                   ),
+                  onPressed: () async {
+                    isRendering.value = true;
+                    final image =
+                        await controller.renderImage(Size(1920, 1920));
+                    final bytes = await image.pngBytes;
+                    isRendering.value = false;
+                    if (!context.mounted) return;
+
+                    if (bytes == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to render image')),
+                      );
+                      return;
+                    }
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Rendered Image'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppImage.memory(
+                              memory: bytes,
+                              showLoading: true,
+                              imageViewerOnTap: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Render'),
                 ),
               ],
-            ),
+            )
           ],
-          const Spacer(),
-          TextButton(
-            child: const Text('Add photo'),
-            onPressed: () async {
-              final pickedImage = await imagePickerNotifier.pickFromGallery();
-              if (pickedImage != null) {
-                final image = await pickedImage.toUiImage();
-
-                controller.addImage(
-                  image,
-                  Size(
-                    min(painterSide.value, image.width.toDouble()),
-                    min(painterSide.value, image.height.toDouble()),
-                  ),
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: isRendering.value ? Colors.grey : null,
-            ),
-            onPressed: () async {
-              isRendering.value = true;
-              final image = await controller.renderImage(Size(1920, 1920));
-              final bytes = await image.pngBytes;
-              isRendering.value = false;
-              if (!context.mounted) return;
-
-              if (bytes == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to render image')),
-                );
-                return;
-              }
-
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Rendered Image'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppImage.memory(
-                        memory: bytes,
-                        showLoading: true,
-                        imageViewerOnTap: true,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-            child: const Text('Render'),
-          ),
-        ],
+        ),
       ),
     );
   }

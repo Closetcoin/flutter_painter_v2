@@ -4,6 +4,7 @@ import '../controllers/factories/shape_factory.dart';
 import '../controllers/painter_controller.dart';
 import '../controllers/settings/settings.dart';
 import '../controllers/drawables/drawables.dart';
+import '../controllers/actions/move_drawable_action.dart';
 
 /// Adds extra getters and setters in [PainterController] to make it easier to use.
 ///
@@ -337,5 +338,171 @@ extension PainterControllerHelper on PainterController {
       return true;
     }
     return false;
+  }
+
+  /// Moves a [drawable] to the front (end of the drawables list, drawn on top).
+  ///
+  /// Returns `true` if the drawable was found and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendDrawableToFront(Drawable drawable, {bool newAction = true}) {
+    final currentIndex = drawables.indexOf(drawable);
+    if (currentIndex < 0 || currentIndex == drawables.length - 1) return false;
+    return _moveDrawable(drawable, drawables.length - 1, newAction: newAction);
+  }
+
+  /// Moves the currently selected object drawable to the front (end of the drawables list, drawn on top).
+  ///
+  /// Returns `true` if a drawable was selected and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendSelectedToFront({bool newAction = true}) {
+    final selected = selectedObjectDrawable;
+    if (selected == null) return false;
+    return sendDrawableToFront(selected, newAction: newAction);
+  }
+
+  /// Moves a [drawable] to the back (beginning of the drawables list, drawn at the bottom).
+  ///
+  /// Returns `true` if the drawable was found and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendDrawableToBack(Drawable drawable, {bool newAction = true}) {
+    final currentIndex = drawables.indexOf(drawable);
+    if (currentIndex <= 0) return false;
+    return _moveDrawable(drawable, 0, newAction: newAction);
+  }
+
+  /// Moves the currently selected object drawable to the back (beginning of the drawables list, drawn at the bottom).
+  ///
+  /// Returns `true` if a drawable was selected and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendSelectedToBack({bool newAction = true}) {
+    final selected = selectedObjectDrawable;
+    if (selected == null) return false;
+    return sendDrawableToBack(selected, newAction: newAction);
+  }
+
+  /// Moves a [drawable] forward by one layer (one index forward in the drawables list).
+  ///
+  /// Returns `true` if the drawable was found and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendDrawableForward(Drawable drawable, {bool newAction = true}) {
+    final currentIndex = drawables.indexOf(drawable);
+    if (currentIndex < 0 || currentIndex >= drawables.length - 1) return false;
+    return _moveDrawable(drawable, currentIndex + 1, newAction: newAction);
+  }
+
+  /// Moves the currently selected object drawable forward by one layer (one index forward in the drawables list).
+  ///
+  /// Returns `true` if a drawable was selected and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendSelectedForward({bool newAction = true}) {
+    final selected = selectedObjectDrawable;
+    if (selected == null) return false;
+    return sendDrawableForward(selected, newAction: newAction);
+  }
+
+  /// Moves a [drawable] backward by one layer (one index backward in the drawables list).
+  ///
+  /// Returns `true` if the drawable was found and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendDrawableBackward(Drawable drawable, {bool newAction = true}) {
+    final currentIndex = drawables.indexOf(drawable);
+    if (currentIndex <= 0) return false;
+    return _moveDrawable(drawable, currentIndex - 1, newAction: newAction);
+  }
+
+  /// Moves the currently selected object drawable backward by one layer (one index backward in the drawables list).
+  ///
+  /// Returns `true` if a drawable was selected and moved successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool sendSelectedBackward({bool newAction = true}) {
+    final selected = selectedObjectDrawable;
+    if (selected == null) return false;
+    return sendDrawableBackward(selected, newAction: newAction);
+  }
+
+  /// Internal helper method to move a drawable to a specific index.
+  bool _moveDrawable(Drawable drawable, int toIndex, {bool newAction = true}) {
+    final action = MoveDrawableAction(drawable, toIndex);
+    final result = action.perform(this);
+    if (result) {
+      performedActions.add(action);
+      if (!newAction) _mergeAction();
+      unperformedActions.clear();
+    }
+    return result;
+  }
+
+  /// Merges a newly added action with the previous action.
+  void _mergeAction() {
+    if (performedActions.length < 2) return;
+    final second = performedActions.removeLast();
+    final first = performedActions.removeLast();
+    final groupedAction = second.merge(first);
+
+    if (groupedAction != null) performedActions.add(groupedAction);
   }
 }
