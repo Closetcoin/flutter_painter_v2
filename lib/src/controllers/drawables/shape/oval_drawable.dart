@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -24,6 +23,7 @@ class OvalDrawable extends Sized2DDrawable implements ShapeDrawable {
         const <ObjectDrawableAssist, Paint>{},
     bool locked = false,
     bool hidden = false,
+    List<List<Offset>> eraseMask = const [],
   })  : paint = paint ?? ShapeDrawable.defaultPaint,
         super(
             size: size,
@@ -33,7 +33,8 @@ class OvalDrawable extends Sized2DDrawable implements ShapeDrawable {
             assists: assists,
             assistPaints: assistPaints,
             locked: locked,
-            hidden: hidden);
+            hidden: hidden,
+            eraseMask: eraseMask);
 
   /// Getter for padding of drawable.
   ///
@@ -65,6 +66,7 @@ class OvalDrawable extends Sized2DDrawable implements ShapeDrawable {
     Size? size,
     Paint? paint,
     bool? locked,
+    List<List<Offset>>? eraseMask,
   }) {
     return OvalDrawable(
       hidden: hidden ?? this.hidden,
@@ -75,6 +77,7 @@ class OvalDrawable extends Sized2DDrawable implements ShapeDrawable {
       size: size ?? this.size,
       locked: locked ?? this.locked,
       paint: paint ?? this.paint,
+      eraseMask: eraseMask ?? this.eraseMask,
     );
   }
 

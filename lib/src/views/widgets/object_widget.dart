@@ -191,7 +191,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                 angle: drawable.rotationAngle,
                 transformHitTests: true,
                 child: Container(
-                  child: freeStyleSettings.mode != FreeStyleMode.none
+                  child: freeStyleSettings.mode != FreeStyleMode.none &&
+                          freeStyleSettings.mode != FreeStyleMode.eraseObject
                       ? widget
                       : MouseRegion(
                           cursor: drawable.locked
@@ -200,11 +201,20 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: () => tapDrawable(drawable),
-                            onScaleStart: (details) =>
-                                onDrawableScaleStart(entry, details),
-                            onScaleUpdate: (details) =>
-                                onDrawableScaleUpdate(entry, details),
-                            onScaleEnd: (_) => onDrawableScaleEnd(entry),
+                            onScaleStart: freeStyleSettings.mode ==
+                                    FreeStyleMode.eraseObject
+                                ? null
+                                : (details) =>
+                                    onDrawableScaleStart(entry, details),
+                            onScaleUpdate: freeStyleSettings.mode ==
+                                    FreeStyleMode.eraseObject
+                                ? null
+                                : (details) =>
+                                    onDrawableScaleUpdate(entry, details),
+                            onScaleEnd: freeStyleSettings.mode ==
+                                    FreeStyleMode.eraseObject
+                                ? null
+                                : (_) => onDrawableScaleEnd(entry),
                             child: AnimatedSwitcher(
                               duration: controlsTransitionDuration,
                               child: selected

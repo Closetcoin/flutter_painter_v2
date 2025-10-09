@@ -416,9 +416,9 @@ class PainterControllerValue {
           ? this.background
           : background,
       selectedObjectDrawable:
-      selectedObjectDrawable == _NoObjectPassedBackgroundDrawable.instance
-          ? this.selectedObjectDrawable
-          : selectedObjectDrawable,
+          selectedObjectDrawable == _NoObjectPassedBackgroundDrawable.instance
+              ? this.selectedObjectDrawable
+              : selectedObjectDrawable,
     );
   }
 
@@ -434,13 +434,12 @@ class PainterControllerValue {
 
   @override
   int get hashCode => Object.hash(
-    Object.hashAll(_drawables),
-    background,
-    settings,
-    selectedObjectDrawable,
-  );
+        Object.hashAll(_drawables),
+        background,
+        settings,
+        selectedObjectDrawable,
+      );
 }
-
 
 /// Private class that is used internally to represent no
 /// [BackgroundDrawable] argument passed for [PainterControllerValue.copyWith].
@@ -474,13 +473,15 @@ class _NoObjectPassedBackgroundDrawable extends ObjectDrawable {
         );
 
   @override
-  ObjectDrawable copyWith(
-      {bool? hidden,
-      Set<ObjectDrawableAssist>? assists,
-      ui.Offset? position,
-      double? rotation,
-      double? scale,
-      bool? locked}) {
+  ObjectDrawable copyWith({
+    bool? hidden,
+    Set<ObjectDrawableAssist>? assists,
+    ui.Offset? position,
+    double? rotation,
+    double? scale,
+    bool? locked,
+    List<List<Offset>>? eraseMask,
+  }) {
     throw UnimplementedError(
         "This object drawable is only to hold the default value in the PainterControllerValue copyWith method, and must not be used otherwise.");
   }

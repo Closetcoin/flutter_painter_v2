@@ -25,6 +25,7 @@ abstract class ShapeDrawable extends ObjectDrawable {
         const <ObjectDrawableAssist, Paint>{},
     bool locked = false,
     bool hidden = false,
+    List<List<Offset>> eraseMask = const [],
   })  : paint = paint ?? defaultPaint,
         super(
             position: position,
@@ -33,7 +34,8 @@ abstract class ShapeDrawable extends ObjectDrawable {
             assists: assists,
             assistPaints: assistPaints,
             locked: locked,
-            hidden: hidden);
+            hidden: hidden,
+            eraseMask: eraseMask);
 
   /// Creates a copy of this but with the given fields replaced with the new values.
   @override
@@ -45,5 +47,6 @@ abstract class ShapeDrawable extends ObjectDrawable {
     double? scale,
     Paint? paint,
     bool? locked,
+    List<List<Offset>>? eraseMask,
   });
 }

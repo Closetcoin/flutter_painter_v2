@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-
 import 'object_drawable.dart';
 
 /// A drawable of an image as an object.
@@ -21,6 +20,7 @@ class ImageDrawable extends ObjectDrawable {
         const <ObjectDrawableAssist, Paint>{},
     bool locked = false,
     bool hidden = false,
+    List<List<Offset>> eraseMask = const [],
     required this.image,
     this.flipped = false,
   }) : super(
@@ -30,7 +30,8 @@ class ImageDrawable extends ObjectDrawable {
             assists: assists,
             assistPaints: assistPaints,
             hidden: hidden,
-            locked: locked);
+            locked: locked,
+            eraseMask: eraseMask);
 
   /// Creates an [ImageDrawable] with the given [image], and calculates the scale based on the given [size].
   /// The scale will be calculated such that the size of the drawable fits into the provided size.
@@ -46,6 +47,7 @@ class ImageDrawable extends ObjectDrawable {
         const <ObjectDrawableAssist, Paint>{},
     bool locked = false,
     bool hidden = false,
+    List<List<Offset>> eraseMask = const [],
     required Image image,
     bool flipped = false,
   }) : this(
@@ -57,19 +59,22 @@ class ImageDrawable extends ObjectDrawable {
             image: image,
             flipped: flipped,
             hidden: hidden,
-            locked: locked);
+            locked: locked,
+            eraseMask: eraseMask);
 
   /// Creates a copy of this but with the given fields replaced with the new values.
   @override
-  ImageDrawable copyWith(
-      {bool? hidden,
-      Set<ObjectDrawableAssist>? assists,
-      Offset? position,
-      double? rotation,
-      double? scale,
-      Image? image,
-      bool? flipped,
-      bool? locked}) {
+  ImageDrawable copyWith({
+    bool? hidden,
+    Set<ObjectDrawableAssist>? assists,
+    Offset? position,
+    double? rotation,
+    double? scale,
+    Image? image,
+    bool? flipped,
+    bool? locked,
+    List<List<Offset>>? eraseMask,
+  }) {
     return ImageDrawable(
       hidden: hidden ?? this.hidden,
       assists: assists ?? this.assists,
@@ -79,6 +84,7 @@ class ImageDrawable extends ObjectDrawable {
       image: image ?? this.image,
       flipped: flipped ?? this.flipped,
       locked: locked ?? this.locked,
+      eraseMask: eraseMask ?? this.eraseMask,
     );
   }
 

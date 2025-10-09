@@ -84,6 +84,14 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.freeStyleMode == FreeStyleMode.erase,
     );
+    final isObjectEraseMode = useListenableSelector(
+      controller,
+      () => controller.isObjectEraseMode,
+    );
+    final selectedHasErasePaths = useListenableSelector(
+      controller,
+      () => controller.selectedHasErasePaths,
+    );
     final strokeWidth = useListenableSelector(
       controller,
       () => controller.freeStyleSettings.strokeWidth,
@@ -191,9 +199,30 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                   onPressed: () => controller.freeStyleMode =
                       isEraseMode ? FreeStyleMode.none : FreeStyleMode.erase,
                 ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: hasSelectedDrawable
+                      ? () => controller.freeStyleMode = isObjectEraseMode
+                          ? FreeStyleMode.none
+                          : FreeStyleMode.eraseObject
+                      : null,
+                  child: Text(
+                    'Erase Object',
+                    style: TextStyle(
+                      color: isObjectEraseMode ? Colors.red : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: selectedHasErasePaths
+                      ? () => controller.clearErasePathsFromSelected()
+                      : null,
+                  child: Text('Clear Erases'),
+                ),
               ],
             ),
-            if (isEraseMode) ...[
+            if (isEraseMode || isObjectEraseMode) ...[
               const SizedBox(height: 16),
               Row(
                 children: [

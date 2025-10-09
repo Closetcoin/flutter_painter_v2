@@ -52,6 +52,11 @@ abstract class ObjectDrawable extends Drawable {
   /// If it is locked, it won't be movable, scalable or re-sizable using the UI.
   final bool locked;
 
+  /// A list of erase paths that mask parts of this object.
+  /// Each path is a list of offsets representing an erase stroke.
+  /// These paths are applied as masks when drawing the object, making those areas transparent.
+  final List<List<Offset>> eraseMask;
+
   /// Default constructor for [ObjectDrawable].
   const ObjectDrawable({
     required this.position,
@@ -60,6 +65,7 @@ abstract class ObjectDrawable extends Drawable {
     this.assists = const <ObjectDrawableAssist>{},
     this.assistPaints = const <ObjectDrawableAssist, Paint>{},
     this.locked = false,
+    this.eraseMask = const [],
     bool hidden = false,
   })  : scale = scale < minScale ? minScale : scale,
         super(hidden: hidden);
@@ -123,8 +129,61 @@ abstract class ObjectDrawable extends Drawable {
     canvas.rotate(rotationAngle);
     canvas.translate(-position.dx, -position.dy);
 
-    // Draw the object
-    drawObject(canvas, size);
+    // If there are erase masks, apply them using saveLayer
+    if (eraseMask.isNotEmpty) {
+      // Save a new layer for applying the erase mask
+      canvas.saveLayer(null, Paint());
+
+      // Draw the object
+      drawObject(canvas, size);
+
+      // Apply erase masks by drawing paths with BlendMode.clear
+      final erasePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..blendMode = BlendMode.clear
+        ..strokeWidth = 10; // Default erase stroke width
+
+      // The erase paths are stored in object-local coordinates
+      // We need to convert them back to canvas coordinates
+      for (final localErasePath in eraseMask) {
+        if (localErasePath.length < 2) continue;
+
+        // Convert local path to canvas coordinates
+        final canvasPath = Path();
+        bool firstPoint = true;
+
+        for (final localPoint in localErasePath) {
+          // Rotate the point by the object's rotation
+          final cosAngle = cos(rotationAngle);
+          final sinAngle = sin(rotationAngle);
+          final rotatedX = localPoint.dx * cosAngle - localPoint.dy * sinAngle;
+          final rotatedY = localPoint.dx * sinAngle + localPoint.dy * cosAngle;
+
+          // Translate to object's position
+          final canvasPoint = Offset(
+            position.dx + rotatedX,
+            position.dy + rotatedY,
+          );
+
+          if (firstPoint) {
+            canvasPath.moveTo(canvasPoint.dx, canvasPoint.dy);
+            firstPoint = false;
+          } else {
+            canvasPath.lineTo(canvasPoint.dx, canvasPoint.dy);
+          }
+        }
+
+        canvas.drawPath(canvasPath, erasePaint);
+      }
+
+      // Restore the layer
+      canvas.restore();
+    } else {
+      // Draw the object normally without masking
+      drawObject(canvas, size);
+    }
 
     // Restore the canvas from the translation and rotation
     canvas.restore();
@@ -164,6 +223,7 @@ abstract class ObjectDrawable extends Drawable {
     double? rotation,
     double? scale,
     bool? locked,
+    List<List<Offset>>? eraseMask,
   });
 
   // @override

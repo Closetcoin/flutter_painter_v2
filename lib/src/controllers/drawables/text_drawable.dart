@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'object_drawable.dart';
@@ -33,6 +32,7 @@ class TextDrawable extends ObjectDrawable {
     bool locked = false,
     bool hidden = false,
     Set<ObjectDrawableAssist> assists = const <ObjectDrawableAssist>{},
+    List<List<Offset>> eraseMask = const [],
   })  : textPainter = TextPainter(
           text: TextSpan(text: text, style: style),
           textAlign: TextAlign.center,
@@ -45,7 +45,8 @@ class TextDrawable extends ObjectDrawable {
             scale: scale,
             assists: assists,
             locked: locked,
-            hidden: hidden);
+            hidden: hidden,
+            eraseMask: eraseMask);
 
   /// Draws the text on the provided [canvas] of size [size].
   @override
@@ -71,6 +72,7 @@ class TextDrawable extends ObjectDrawable {
     TextStyle? style,
     bool? locked,
     TextDirection? direction,
+    List<List<Offset>>? eraseMask,
   }) {
     return TextDrawable(
       text: text ?? this.text,
@@ -82,6 +84,7 @@ class TextDrawable extends ObjectDrawable {
       assists: assists ?? this.assists,
       hidden: hidden ?? this.hidden,
       locked: locked ?? this.locked,
+      eraseMask: eraseMask ?? this.eraseMask,
     );
   }
 

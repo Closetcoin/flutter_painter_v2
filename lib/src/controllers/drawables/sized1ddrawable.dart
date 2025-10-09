@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -23,6 +22,7 @@ abstract class Sized1DDrawable extends ObjectDrawable {
         const <ObjectDrawableAssist, Paint>{},
     bool locked = false,
     bool hidden = false,
+    List<List<Offset>> eraseMask = const [],
   }) : super(
             position: position,
             rotationAngle: rotationAngle,
@@ -30,7 +30,8 @@ abstract class Sized1DDrawable extends ObjectDrawable {
             assists: assists,
             assistPaints: assistPaints,
             locked: locked,
-            hidden: hidden);
+            hidden: hidden,
+            eraseMask: eraseMask);
 
   /// Getter for padding of drawable.
   ///
@@ -49,6 +50,7 @@ abstract class Sized1DDrawable extends ObjectDrawable {
     double? scale,
     double? length,
     bool? locked,
+    List<List<Offset>>? eraseMask,
   });
 
   /// Calculates the size of the rendered object.

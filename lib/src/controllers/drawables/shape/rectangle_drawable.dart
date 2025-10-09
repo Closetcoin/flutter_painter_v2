@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -28,6 +27,7 @@ class RectangleDrawable extends Sized2DDrawable implements ShapeDrawable {
         const <ObjectDrawableAssist, Paint>{},
     bool locked = false,
     bool hidden = false,
+    List<List<Offset>> eraseMask = const [],
     this.borderRadius = const BorderRadius.all(Radius.circular(5)),
   })  : paint = paint ?? ShapeDrawable.defaultPaint,
         super(
@@ -38,7 +38,8 @@ class RectangleDrawable extends Sized2DDrawable implements ShapeDrawable {
             assists: assists,
             assistPaints: assistPaints,
             locked: locked,
-            hidden: hidden);
+            hidden: hidden,
+            eraseMask: eraseMask);
 
   /// Getter for padding of drawable.
   ///
@@ -77,6 +78,7 @@ class RectangleDrawable extends Sized2DDrawable implements ShapeDrawable {
     Paint? paint,
     bool? locked,
     BorderRadius? borderRadius,
+    List<List<Offset>>? eraseMask,
   }) {
     return RectangleDrawable(
       hidden: hidden ?? this.hidden,
@@ -87,6 +89,7 @@ class RectangleDrawable extends Sized2DDrawable implements ShapeDrawable {
       size: size ?? this.size,
       paint: paint ?? this.paint,
       locked: locked ?? this.locked,
+      eraseMask: eraseMask ?? this.eraseMask,
       borderRadius: borderRadius ?? this.borderRadius,
     );
   }

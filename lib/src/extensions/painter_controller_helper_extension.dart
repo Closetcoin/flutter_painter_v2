@@ -400,6 +400,66 @@ extension PainterControllerHelper on PainterController {
   /// `false` otherwise.
   bool get canFlipSelected => selectedObjectDrawable is ImageDrawable;
 
+  /// Adds an erase path to the currently selected object drawable.
+  ///
+  /// The [erasePath] is a list of offsets representing points along the erase stroke.
+  /// These paths will be applied as masks when drawing the object, making those areas transparent
+  /// and revealing what's underneath.
+  ///
+  /// Returns `true` if a drawable was selected and the erase path was added successfully,
+  /// `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool addErasePathToSelected(List<Offset> erasePath, {bool newAction = true}) {
+    if (!hasSelectedDrawable) return false;
+    final selected = selectedObjectDrawable!;
+    final newEraseMask = List<List<Offset>>.from(selected.eraseMask)
+      ..add(erasePath);
+    final newDrawable = selected.copyWith(eraseMask: newEraseMask);
+    return replaceDrawable(selected, newDrawable, newAction: newAction);
+  }
+
+  /// Clears all erase paths from the currently selected object drawable.
+  ///
+  /// Returns `true` if a drawable was selected and had erase paths that were cleared,
+  /// `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool clearErasePathsFromSelected({bool newAction = true}) {
+    if (!hasSelectedDrawable) return false;
+    final selected = selectedObjectDrawable!;
+    if (selected.eraseMask.isEmpty) return false;
+    final newDrawable = selected.copyWith(eraseMask: const []);
+    return replaceDrawable(selected, newDrawable, newAction: newAction);
+  }
+
+  /// Whether the currently selected object drawable has any erase paths.
+  ///
+  /// Returns `true` if a drawable is selected and has erase mask paths,
+  /// `false` otherwise.
+  bool get selectedHasErasePaths =>
+      hasSelectedDrawable && selectedObjectDrawable!.eraseMask.isNotEmpty;
+
+  /// Whether the object erase mode is currently active.
+  ///
+  /// Returns `true` if the free-style mode is set to [FreeStyleMode.eraseObject],
+  /// `false` otherwise.
+  bool get isObjectEraseMode => freeStyleMode == FreeStyleMode.eraseObject;
+
   /// Moves a [drawable] to the front (end of the drawables list, drawn on top).
   ///
   /// Returns `true` if the drawable was found and moved successfully, `false` otherwise.
