@@ -52,6 +52,34 @@ class OutfitCreatorScreen extends HookConsumerWidget {
     final controller = _usePainterController();
     final canUndo = useListenableSelector(controller, () => controller.canUndo);
     final canRedo = useListenableSelector(controller, () => controller.canRedo);
+    final canFlipSelected = useListenableSelector(
+      controller,
+      () => controller.canFlipSelected,
+    );
+    final canMoveSelectedBackward = useListenableSelector(
+      controller,
+      () => controller.canMoveSelectedBackward,
+    );
+    final canMoveSelectedForward = useListenableSelector(
+      controller,
+      () => controller.canMoveSelectedForward,
+    );
+    final canMoveSelectedToBack = useListenableSelector(
+      controller,
+      () => controller.canMoveSelectedToBack,
+    );
+    final canMoveSelectedToFront = useListenableSelector(
+      controller,
+      () => controller.canMoveSelectedToFront,
+    );
+    final hasSelectedDrawable = useListenableSelector(
+      controller,
+      () => controller.hasSelectedDrawable,
+    );
+    final hasDrawables = useListenableSelector(
+      controller,
+      () => controller.hasDrawables,
+    );
     final isEraseMode = useListenableSelector(
       controller,
       () => controller.freeStyleMode == FreeStyleMode.erase,
@@ -59,10 +87,6 @@ class OutfitCreatorScreen extends HookConsumerWidget {
     final strokeWidth = useListenableSelector(
       controller,
       () => controller.freeStyleSettings.strokeWidth,
-    );
-    final isImageSelected = useListenableSelector(
-      controller,
-      () => controller.selectedObjectDrawable is ImageDrawable,
     );
 
     final imagePickerNotifier = ref.read(appImagePickerProvider.notifier);
@@ -110,38 +134,51 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: isImageSelected
+                  onPressed: canFlipSelected
                       ? () => controller.flipSelectedImageHorizontally()
                       : null,
                   child: Text('Flip'),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: isImageSelected
+                  onPressed: canMoveSelectedBackward
                       ? () => controller.sendSelectedBackward()
                       : null,
                   child: Text('Send Backward'),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: isImageSelected
+                  onPressed: canMoveSelectedForward
                       ? () => controller.sendSelectedForward()
                       : null,
                   child: Text('Send Forward'),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: isImageSelected
+                  onPressed: canMoveSelectedToBack
                       ? () => controller.sendSelectedToBack()
                       : null,
                   child: Text('Send to Back'),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: isImageSelected
+                  onPressed: canMoveSelectedToFront
                       ? () => controller.sendSelectedToFront()
                       : null,
                   child: Text('Send to Front'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: hasSelectedDrawable
+                      ? () => controller.removeSelectedDrawable()
+                      : null,
+                  child: Text('Remove'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed:
+                      hasDrawables ? () => controller.clearDrawables() : null,
+                  child: Text('Clear'),
                 ),
                 const SizedBox(width: 8),
                 TextButton(

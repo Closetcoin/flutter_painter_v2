@@ -329,16 +329,76 @@ extension PainterControllerHelper on PainterController {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   bool flipSelectedImageHorizontally() {
-    final selected = selectedObjectDrawable;
-    if (selected is ImageDrawable) {
-      replaceDrawable(
-        selected,
-        selected.copyWith(flipped: !selected.flipped),
-      );
-      return true;
-    }
-    return false;
+    if (!canFlipSelected) return false;
+    final selected = selectedObjectDrawable as ImageDrawable;
+    replaceDrawable(
+      selected,
+      selected.copyWith(flipped: !selected.flipped),
+    );
+    return true;
   }
+
+  /// Removes the currently selected object drawable.
+  ///
+  /// Returns `true` if a drawable was selected and removed successfully, `false` otherwise.
+  ///
+  /// If [newAction] is `true`, the action is added as an independent action
+  /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
+  /// previous action and is merged with it.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool removeSelectedDrawable({bool newAction = true}) {
+    if (!hasSelectedDrawable) return false;
+    return removeDrawable(selectedObjectDrawable!, newAction: newAction);
+  }
+
+  /// Whether the currently selected object drawable can be moved forward (toward the front).
+  ///
+  /// Returns `true` if a drawable is selected and is not already at the front,
+  /// `false` otherwise.
+  bool get canMoveSelectedForward =>
+      selectedObjectDrawable != null &&
+      drawables.contains(selectedObjectDrawable!) &&
+      drawables.indexOf(selectedObjectDrawable!) < drawables.length - 1;
+
+  /// Whether the currently selected object drawable can be moved backward (toward the back).
+  ///
+  /// Returns `true` if a drawable is selected and is not already at the back,
+  /// `false` otherwise.
+  bool get canMoveSelectedBackward =>
+      selectedObjectDrawable != null &&
+      drawables.indexOf(selectedObjectDrawable!) > 0;
+
+  /// Whether the currently selected object drawable can be moved to the front.
+  ///
+  /// Returns `true` if a drawable is selected and is not already at the front,
+  /// `false` otherwise.
+  bool get canMoveSelectedToFront => canMoveSelectedForward;
+
+  /// Whether the currently selected object drawable can be moved to the back.
+  ///
+  /// Returns `true` if a drawable is selected and is not already at the back,
+  /// `false` otherwise.
+  bool get canMoveSelectedToBack => canMoveSelectedBackward;
+
+  /// Whether there are any drawables that can be cleared.
+  ///
+  /// Returns `true` if there is at least one drawable, `false` otherwise.
+  bool get hasDrawables => drawables.isNotEmpty;
+
+  /// Whether there is a selected object drawable that can be removed.
+  ///
+  /// Returns `true` if a drawable is currently selected, `false` otherwise.
+  bool get hasSelectedDrawable => selectedObjectDrawable != null;
+
+  /// Whether the currently selected drawable is an [ImageDrawable] that can be flipped.
+  ///
+  /// Returns `true` if a drawable is selected and it is an [ImageDrawable],
+  /// `false` otherwise.
+  bool get canFlipSelected => selectedObjectDrawable is ImageDrawable;
 
   /// Moves a [drawable] to the front (end of the drawables list, drawn on top).
   ///
@@ -371,9 +431,8 @@ extension PainterControllerHelper on PainterController {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   bool sendSelectedToFront({bool newAction = true}) {
-    final selected = selectedObjectDrawable;
-    if (selected == null) return false;
-    return sendDrawableToFront(selected, newAction: newAction);
+    if (!canMoveSelectedToFront) return false;
+    return sendDrawableToFront(selectedObjectDrawable!, newAction: newAction);
   }
 
   /// Moves a [drawable] to the back (beginning of the drawables list, drawn at the bottom).
@@ -407,9 +466,8 @@ extension PainterControllerHelper on PainterController {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   bool sendSelectedToBack({bool newAction = true}) {
-    final selected = selectedObjectDrawable;
-    if (selected == null) return false;
-    return sendDrawableToBack(selected, newAction: newAction);
+    if (!canMoveSelectedToBack) return false;
+    return sendDrawableToBack(selectedObjectDrawable!, newAction: newAction);
   }
 
   /// Moves a [drawable] forward by one layer (one index forward in the drawables list).
@@ -443,9 +501,8 @@ extension PainterControllerHelper on PainterController {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   bool sendSelectedForward({bool newAction = true}) {
-    final selected = selectedObjectDrawable;
-    if (selected == null) return false;
-    return sendDrawableForward(selected, newAction: newAction);
+    if (!canMoveSelectedForward) return false;
+    return sendDrawableForward(selectedObjectDrawable!, newAction: newAction);
   }
 
   /// Moves a [drawable] backward by one layer (one index backward in the drawables list).
@@ -479,9 +536,8 @@ extension PainterControllerHelper on PainterController {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   bool sendSelectedBackward({bool newAction = true}) {
-    final selected = selectedObjectDrawable;
-    if (selected == null) return false;
-    return sendDrawableBackward(selected, newAction: newAction);
+    if (!canMoveSelectedBackward) return false;
+    return sendDrawableBackward(selectedObjectDrawable!, newAction: newAction);
   }
 
   /// Internal helper method to move a drawable to a specific index.
