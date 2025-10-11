@@ -194,7 +194,7 @@ class _FreeStyleWidgetState extends State<_FreeStyleWidget> {
   /// This ensures the erase path moves with the object when it's transformed.
   List<Offset> _convertToObjectLocalCoordinates(
       List<Offset> canvasPath, ObjectDrawable object) {
-    // Convert each point to be relative to the object's position and rotation
+    // Convert each point to be relative to the object's position, rotation, and scale
     return canvasPath.map((point) {
       // Translate to object's position
       final translatedPoint = point - object.position;
@@ -203,8 +203,12 @@ class _FreeStyleWidgetState extends State<_FreeStyleWidget> {
       final cos = math.cos(-object.rotationAngle);
       final sin = math.sin(-object.rotationAngle);
 
-      final localX = translatedPoint.dx * cos - translatedPoint.dy * sin;
-      final localY = translatedPoint.dx * sin + translatedPoint.dy * cos;
+      final rotatedX = translatedPoint.dx * cos - translatedPoint.dy * sin;
+      final rotatedY = translatedPoint.dx * sin + translatedPoint.dy * cos;
+
+      // Scale by the inverse of the object's scale to get true local coordinates
+      final localX = rotatedX / object.scale;
+      final localY = rotatedY / object.scale;
 
       return Offset(localX, localY);
     }).toList();

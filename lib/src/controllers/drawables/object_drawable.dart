@@ -143,35 +143,31 @@ abstract class ObjectDrawable extends Drawable {
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
         ..blendMode = BlendMode.clear
-        ..strokeWidth = 10; // Default erase stroke width
+        ..strokeWidth = 10 * scale; // Scale the stroke width with the object
 
-      // The erase paths are stored in object-local coordinates
-      // We need to convert them back to canvas coordinates
+      // The erase paths are stored in object-local coordinates (unscaled, unrotated)
+      // The canvas is already rotated and positioned, so we just need to scale
+      // the local coordinates relative to the object's position
       for (final localErasePath in eraseMask) {
         if (localErasePath.length < 2) continue;
 
-        // Convert local path to canvas coordinates
         final canvasPath = Path();
         bool firstPoint = true;
 
         for (final localPoint in localErasePath) {
-          // Rotate the point by the object's rotation
-          final cosAngle = cos(rotationAngle);
-          final sinAngle = sin(rotationAngle);
-          final rotatedX = localPoint.dx * cosAngle - localPoint.dy * sinAngle;
-          final rotatedY = localPoint.dx * sinAngle + localPoint.dy * cosAngle;
-
-          // Translate to object's position
-          final canvasPoint = Offset(
-            position.dx + rotatedX,
-            position.dy + rotatedY,
+          // The local point is stored relative to the object's position
+          // in unscaled, unrotated coordinates
+          // Since the canvas is already rotated/positioned, we just scale and translate
+          final scaledPoint = Offset(
+            position.dx + localPoint.dx * scale,
+            position.dy + localPoint.dy * scale,
           );
 
           if (firstPoint) {
-            canvasPath.moveTo(canvasPoint.dx, canvasPoint.dy);
+            canvasPath.moveTo(scaledPoint.dx, scaledPoint.dy);
             firstPoint = false;
           } else {
-            canvasPath.lineTo(canvasPoint.dx, canvasPoint.dy);
+            canvasPath.lineTo(scaledPoint.dx, scaledPoint.dy);
           }
         }
 
