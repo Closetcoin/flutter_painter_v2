@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+import '../drawables/drawable.dart';
 import '../drawables/image_drawable.dart';
 import '../painter_controller.dart';
 import 'action.dart';
-import 'replace_drawable_action.dart';
+import 'add_drawables_action.dart';
+import 'insert_drawables_action.dart';
 
 /// An action of removing the background from an [ImageDrawable] in the [PainterController].
 ///
@@ -26,9 +28,25 @@ class RemoveBackgroundAction extends ControllerAction<bool, bool> {
   @protected
   @override
   bool perform$(PainterController controller) {
-    final replaceAction =
-        ReplaceDrawableAction(originalDrawable, processedDrawable);
-    return replaceAction.perform(controller);
+    final value = controller.value;
+    final oldDrawableIndex = value.drawables.indexOf(originalDrawable);
+    if (oldDrawableIndex < 0) {
+      return false;
+    }
+
+    final currentDrawables = List<Drawable>.from(value.drawables);
+    final selectedObject = controller.selectedObjectDrawable;
+    final isSelectedObject = originalDrawable == selectedObject;
+
+    currentDrawables[oldDrawableIndex] = processedDrawable;
+
+    controller.value = value.copyWith(
+      drawables: currentDrawables,
+      selectedObjectDrawable:
+          isSelectedObject ? processedDrawable : selectedObject,
+    );
+
+    return true;
   }
 
   /// Un-performs the action.
@@ -39,9 +57,25 @@ class RemoveBackgroundAction extends ControllerAction<bool, bool> {
   @protected
   @override
   bool unperform$(PainterController controller) {
-    final replaceAction =
-        ReplaceDrawableAction(processedDrawable, originalDrawable);
-    return replaceAction.perform(controller);
+    final value = controller.value;
+    final newDrawableIndex = value.drawables.indexOf(processedDrawable);
+    if (newDrawableIndex < 0) {
+      return false;
+    }
+
+    final currentDrawables = List<Drawable>.from(value.drawables);
+    final selectedObject = controller.selectedObjectDrawable;
+    final isSelectedObject = processedDrawable == selectedObject;
+
+    currentDrawables[newDrawableIndex] = originalDrawable;
+
+    controller.value = value.copyWith(
+      drawables: currentDrawables,
+      selectedObjectDrawable:
+          isSelectedObject ? originalDrawable : selectedObject,
+    );
+
+    return true;
   }
 
   /// Merges [this] action and the [previousAction] into one action.

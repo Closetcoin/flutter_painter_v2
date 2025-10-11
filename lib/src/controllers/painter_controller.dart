@@ -270,6 +270,9 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
     final action = performedActions.removeLast();
     action.unperform(this);
     unperformedActions.add(action);
+    // Notify listeners because canRedo depends on unperformedActions
+    // which was just updated after the action's notifyListeners was called
+    notifyListeners();
   }
 
   /// Redoes the last [undo]ne action. The redo operation can be [undo]ne.
@@ -285,6 +288,9 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
     final action = unperformedActions.removeLast();
     action.perform(this);
     performedActions.add(action);
+    // Notify listeners because canUndo depends on performedActions
+    // which was just updated after the action's notifyListeners was called
+    notifyListeners();
   }
 
   /// Merges a newly added action with the previous action.
