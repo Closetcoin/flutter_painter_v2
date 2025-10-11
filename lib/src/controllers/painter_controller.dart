@@ -359,6 +359,11 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// [smoothMask]: bilinear smoothing of mask edges.
   /// [enhanceEdges]: extra refinement on boundaries.
   /// [padPx]: pad the image with a transparent border.
+  /// [applyCrop]: whether to apply smart square crop after background removal (default true).
+  /// [alphaThreshold]: alpha threshold for crop detection (0..255; default 12).
+  /// [marginFrac]: extra margin around subject for crop (default 0.08 = 8%).
+  /// [minSidePx]: minimum crop size in pixels (default 100).
+  /// [stride]: sampling stride for faster crop detection (default 2).
   /// [onError]: Optional callback for error handling.
   ///
   /// Example usage:
@@ -374,6 +379,11 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
     bool smoothMask = true,
     bool enhanceEdges = true,
     int padPx = 6,
+    bool applyCrop = true,
+    int alphaThreshold = 12,
+    double marginFrac = 0.08,
+    int minSidePx = 100,
+    int stride = 2,
     void Function(Object error)? onError,
   }) async {
     final selected = selectedObjectDrawable;
@@ -392,6 +402,11 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
         smoothMask: smoothMask,
         enhanceEdges: enhanceEdges,
         padPx: padPx,
+        applyCrop: applyCrop,
+        alphaThreshold: alphaThreshold,
+        marginFrac: marginFrac,
+        minSidePx: minSidePx,
+        stride: stride,
       );
 
       // Create a new drawable with the processed image
