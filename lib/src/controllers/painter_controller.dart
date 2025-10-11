@@ -98,11 +98,32 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// and can be [undo]ne in the future. If it is `false`, the action is connected to the
   /// previous action and is merged with it.
   ///
+  /// If `singleObjectMode` is enabled in object settings and any of the drawables
+  /// being added are [ObjectDrawable]s, all existing [ObjectDrawable]s will be
+  /// removed before adding the new ones.
+  ///
   /// Calling this will notify all the listeners of this [PainterController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void addDrawables(Iterable<Drawable> drawables, {bool newAction = true}) {
+    // If single object mode is enabled and we're adding object drawables,
+    // remove existing object drawables first
+    if (value.settings.object.singleObjectMode) {
+      final addingObjectDrawables =
+          drawables.any((drawable) => drawable is ObjectDrawable);
+      if (addingObjectDrawables) {
+        final existingObjectDrawables =
+            value.drawables.whereType<ObjectDrawable>().toList();
+        if (existingObjectDrawables.isNotEmpty) {
+          // Remove all existing object drawables
+          for (final drawable in existingObjectDrawables) {
+            removeDrawable(drawable, newAction: false);
+          }
+        }
+      }
+    }
+
     final action = AddDrawablesAction(drawables.toList());
     action.perform(this);
     _addAction(action, newAction);
@@ -366,11 +387,18 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// If [selectedObjectDrawable] is already `null`, nothing happens
   /// and [notifyListeners] is not called.
   ///
+  /// In single object mode, deselection is prevented unless the object is being removed.
+  ///
   /// Calling this will notify all the listeners of this [PainterController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void deselectObjectDrawable({bool isRemoved = false}) {
+    // In single object mode, prevent deselection unless the object is being removed
+    if (value.settings.object.singleObjectMode && !isRemoved) {
+      return;
+    }
+
     if (selectedObjectDrawable != null && isRemoved) {
       _eventsSteamController.add(const SelectedObjectDrawableRemovedEvent());
     }

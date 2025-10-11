@@ -60,6 +60,16 @@ class ObjectSettings {
   /// Defaults to `true`.
   final bool showSelectionIndicator;
 
+  /// Whether to allow only a single object drawable at a time.
+  ///
+  /// When `true`, adding a new object drawable (like an image or text) will automatically
+  /// remove all existing object drawables. Additionally, the object cannot be deselected
+  /// by tapping the background - it will always remain selected. Free-style drawings,
+  /// shapes, and backgrounds are not affected by this setting.
+  ///
+  /// Defaults to `false`.
+  final bool singleObjectMode;
+
   /// Creates a [TextSettings] with the given [layoutAssist].
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
@@ -67,6 +77,7 @@ class ObjectSettings {
     this.showScaleRotationControlsResolver = _showScaleRotationControls,
     this.autoSelectAfterAdd = false,
     this.showSelectionIndicator = true,
+    this.singleObjectMode = false,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -76,6 +87,7 @@ class ObjectSettings {
     ObjectShowScaleRotationControlsResolver? showScaleRotationControlsResolver,
     bool? autoSelectAfterAdd,
     bool? showSelectionIndicator,
+    bool? singleObjectMode,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -86,6 +98,7 @@ class ObjectSettings {
       autoSelectAfterAdd: autoSelectAfterAdd ?? this.autoSelectAfterAdd,
       showSelectionIndicator:
           showSelectionIndicator ?? this.showSelectionIndicator,
+      singleObjectMode: singleObjectMode ?? this.singleObjectMode,
     );
   }
 

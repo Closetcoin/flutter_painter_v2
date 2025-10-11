@@ -80,10 +80,6 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.hasDrawables,
     );
-    final isEraseMode = useListenableSelector(
-      controller,
-      () => controller.freeStyleMode == FreeStyleMode.erase,
-    );
     final isObjectEraseMode = useListenableSelector(
       controller,
       () => controller.isObjectEraseMode,
@@ -99,6 +95,10 @@ class OutfitCreatorScreen extends HookConsumerWidget {
     final showSelectionIndicator = useListenableSelector(
       controller,
       () => controller.objectSettings.showSelectionIndicator,
+    );
+    final singleObjectMode = useListenableSelector(
+      controller,
+      () => controller.objectSettings.singleObjectMode,
     );
 
     final imagePickerNotifier = ref.read(appImagePickerProvider.notifier);
@@ -132,193 +132,209 @@ class OutfitCreatorScreen extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              children: [
-                TextButton(
-                  onPressed: canUndo ? () => controller.undo() : null,
-                  child: Text('Undo'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: canRedo ? () => controller.redo() : null,
-                  child: Text('Redo'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: canFlipSelected
-                      ? () => controller.flipSelectedImageHorizontally()
-                      : null,
-                  child: Text('Flip'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: canMoveSelectedBackward
-                      ? () => controller.sendSelectedBackward()
-                      : null,
-                  child: Text('Send Backward'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: canMoveSelectedForward
-                      ? () => controller.sendSelectedForward()
-                      : null,
-                  child: Text('Send Forward'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: canMoveSelectedToBack
-                      ? () => controller.sendSelectedToBack()
-                      : null,
-                  child: Text('Send to Back'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: canMoveSelectedToFront
-                      ? () => controller.sendSelectedToFront()
-                      : null,
-                  child: Text('Send to Front'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: hasSelectedDrawable
-                      ? () => controller.removeSelectedDrawable()
-                      : null,
-                  child: Text('Remove'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed:
-                      hasDrawables ? () => controller.clearDrawables() : null,
-                  child: Text('Clear'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  child: Text(
-                    'Erase',
-                    style: TextStyle(
-                      color: isEraseMode ? Colors.red : null,
-                    ),
-                  ),
-                  onPressed: () => controller.freeStyleMode =
-                      isEraseMode ? FreeStyleMode.none : FreeStyleMode.erase,
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: hasSelectedDrawable
-                      ? () => controller.freeStyleMode = isObjectEraseMode
-                          ? FreeStyleMode.none
-                          : FreeStyleMode.eraseObject
-                      : null,
-                  child: Text(
-                    'Erase Object',
-                    style: TextStyle(
-                      color: isObjectEraseMode ? Colors.red : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: selectedHasErasePaths
-                      ? () => controller.clearErasePathsFromSelected()
-                      : null,
-                  child: Text('Clear Erases'),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => controller.objectSettings =
-                      controller.objectSettings.copyWith(
-                    showSelectionIndicator: !showSelectionIndicator,
-                  ),
-                  child: Text(
-                    showSelectionIndicator
-                        ? 'Hide Indicator'
-                        : 'Show Indicator',
-                  ),
-                ),
-              ],
-            ),
-            if (isEraseMode || isObjectEraseMode) ...[
-              const SizedBox(height: 16),
-              Row(
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
                 children: [
-                  const Text('Stroke Width'),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Slider.adaptive(
-                      min: 2,
-                      max: 25,
-                      value: strokeWidth,
-                      onChanged: (value) => controller.freeStyleSettings =
-                          controller.freeStyleSettings
-                              .copyWith(strokeWidth: value),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            const Spacer(),
-            Column(
-              children: [
-                TextButton(
-                  child: const Text('Add photo'),
-                  onPressed: () async {
-                    final pickedImage =
-                        await imagePickerNotifier.pickFromGallery();
-                    if (pickedImage != null) {
-                      final image = await pickedImage.toUiImage();
-
-                      controller.addImage(
-                        image,
-                        Size(
-                          min(painterSide.value, image.width.toDouble()),
-                          min(painterSide.value, image.height.toDouble()),
-                        ),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: isRendering.value ? Colors.grey : null,
-                  ),
-                  onPressed: () async {
-                    isRendering.value = true;
-                    final image =
-                        await controller.renderImage(Size(1920, 1920));
-                    final bytes = await image.pngBytes;
-                    isRendering.value = false;
-                    if (!context.mounted) return;
-
-                    if (bytes == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Failed to render image')),
-                      );
-                      return;
-                    }
-
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Rendered Image'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AppImage.memory(
-                              memory: bytes,
-                              showLoading: true,
-                              imageViewerOnTap: true,
-                            ),
-                          ],
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      TextButton(
+                        onPressed: canUndo ? () => controller.undo() : null,
+                        child: Text('Undo'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: canRedo ? () => controller.redo() : null,
+                        child: Text('Redo'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: canFlipSelected
+                            ? () => controller.flipSelectedImageHorizontally()
+                            : null,
+                        child: Text('Flip'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: canMoveSelectedBackward
+                            ? () => controller.sendSelectedBackward()
+                            : null,
+                        child: Text('Send Backward'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: canMoveSelectedForward
+                            ? () => controller.sendSelectedForward()
+                            : null,
+                        child: Text('Send Forward'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: canMoveSelectedToBack
+                            ? () => controller.sendSelectedToBack()
+                            : null,
+                        child: Text('Send to Back'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: canMoveSelectedToFront
+                            ? () => controller.sendSelectedToFront()
+                            : null,
+                        child: Text('Send to Front'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: hasSelectedDrawable
+                            ? () => controller.removeSelectedDrawable()
+                            : null,
+                        child: Text('Remove'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: hasDrawables
+                            ? () => controller.clearDrawables()
+                            : null,
+                        child: Text('Clear'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: hasSelectedDrawable
+                            ? () => controller.freeStyleMode = isObjectEraseMode
+                                ? FreeStyleMode.none
+                                : FreeStyleMode.eraseObject
+                            : null,
+                        child: Text(
+                          'Erase Object',
+                          style: TextStyle(
+                            color: isObjectEraseMode ? Colors.red : null,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  child: const Text('Render'),
-                ),
-              ],
-            )
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: selectedHasErasePaths
+                            ? () => controller.clearErasePathsFromSelected()
+                            : null,
+                        child: Text('Clear Erases'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () => controller.objectSettings =
+                            controller.objectSettings.copyWith(
+                          showSelectionIndicator: !showSelectionIndicator,
+                        ),
+                        child: Text(
+                          showSelectionIndicator
+                              ? 'Hide Indicator'
+                              : 'Show Indicator',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: singleObjectMode
+                              ? Colors.blue.withOpacity(0.2)
+                              : null,
+                        ),
+                        onPressed: () => controller.objectSettings =
+                            controller.objectSettings.copyWith(
+                          singleObjectMode: !singleObjectMode,
+                        ),
+                        child: Text(
+                          singleObjectMode
+                              ? 'Single Object: ON'
+                              : 'Single Object: OFF',
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (isObjectEraseMode) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Text('Stroke Width'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Slider.adaptive(
+                            min: 2,
+                            max: 25,
+                            value: strokeWidth,
+                            onChanged: (value) => controller.freeStyleSettings =
+                                controller.freeStyleSettings
+                                    .copyWith(strokeWidth: value),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const Spacer(),
+                  Column(
+                    children: [
+                      TextButton(
+                        child: const Text('Add photo'),
+                        onPressed: () async {
+                          final pickedImage =
+                              await imagePickerNotifier.pickFromGallery();
+                          if (pickedImage != null) {
+                            final image = await pickedImage.toUiImage();
+
+                            controller.addImage(
+                              image,
+                              Size(
+                                min(painterSide.value, image.width.toDouble()),
+                                min(painterSide.value, image.height.toDouble()),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              isRendering.value ? Colors.grey : null,
+                        ),
+                        onPressed: () async {
+                          isRendering.value = true;
+                          final image =
+                              await controller.renderImage(Size(1920, 1920));
+                          final bytes = await image.pngBytes;
+                          isRendering.value = false;
+                          if (!context.mounted) return;
+
+                          if (bytes == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Failed to render image')),
+                            );
+                            return;
+                          }
+
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Rendered Image'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AppImage.memory(
+                                    memory: bytes,
+                                    showLoading: true,
+                                    imageViewerOnTap: true,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text('Render'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -350,6 +366,7 @@ PainterController _usePainterController() => useRef(
           object: ObjectSettings(
             autoSelectAfterAdd: true,
             showSelectionIndicator: true,
+            singleObjectMode: true,
           ),
         ),
       ),

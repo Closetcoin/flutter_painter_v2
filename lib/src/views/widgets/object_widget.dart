@@ -590,7 +590,13 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   /// Triggers when the user taps an empty space.
   ///
   /// Deselects the selected object drawable.
+  /// If single object mode is enabled, deselection is prevented.
   void onBackgroundTapped() {
+    // Don't allow deselection in single object mode
+    if (settings.singleObjectMode) {
+      return;
+    }
+
     SelectedObjectDrawableUpdatedNotification(null).dispatch(context);
 
     setState(() {
