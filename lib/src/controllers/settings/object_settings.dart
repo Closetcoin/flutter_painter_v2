@@ -43,11 +43,20 @@ class ObjectSettings {
   final ObjectShowScaleRotationControlsResolver
       showScaleRotationControlsResolver;
 
+  /// Whether to automatically select an object drawable after it is added.
+  ///
+  /// When `true`, newly added image drawables will be automatically selected,
+  /// making them immediately editable without requiring a manual tap.
+  ///
+  /// Defaults to `false`.
+  final bool autoSelectAfterAdd;
+
   /// Creates a [TextSettings] with the given [layoutAssist].
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
     this.enlargeControlsResolver = _enlargeControls,
     this.showScaleRotationControlsResolver = _showScaleRotationControls,
+    this.autoSelectAfterAdd = false,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -55,6 +64,7 @@ class ObjectSettings {
     ObjectLayoutAssistSettings? layoutAssist,
     ObjectEnlargeControlsResolver? enlargeControlsResolver,
     ObjectShowScaleRotationControlsResolver? showScaleRotationControlsResolver,
+    bool? autoSelectAfterAdd,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -62,6 +72,7 @@ class ObjectSettings {
           enlargeControlsResolver ?? this.enlargeControlsResolver,
       showScaleRotationControlsResolver: showScaleRotationControlsResolver ??
           this.showScaleRotationControlsResolver,
+      autoSelectAfterAdd: autoSelectAfterAdd ?? this.autoSelectAfterAdd,
     );
   }
 

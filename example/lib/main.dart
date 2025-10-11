@@ -329,6 +329,9 @@ class _ExpandedSquare extends StatelessWidget {
 
 PainterController _usePainterController() => useRef(
       PainterController(
-        settings: PainterSettings(freeStyle: FreeStyleSettings(strokeWidth: 5)),
+        settings: PainterSettings(
+          freeStyle: FreeStyleSettings(strokeWidth: 5),
+          object: ObjectSettings(autoSelectAfterAdd: true),
+        ),
       ),
     ).value;

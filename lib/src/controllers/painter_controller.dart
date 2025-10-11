@@ -277,6 +277,9 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// If [size] is provided, the drawable will scaled to fit that size.
   /// If not, it will take the original image's size.
   ///
+  /// If [autoSelectAfterAdd] is `true` in the object settings, the newly added
+  /// image will be automatically selected.
+  ///
   /// Note that if the painter is not rendered yet (for example, this method was used in the initState method),
   /// the drawable position will be [Offset.zero].
   /// If you face this issue, call this method in a post-frame callback.
@@ -309,6 +312,11 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
     }
 
     addDrawables([drawable]);
+
+    // Auto-select the drawable if the setting is enabled
+    if (value.settings.object.autoSelectAfterAdd) {
+      selectObjectDrawable(drawable);
+    }
   }
 
   /// Renders the background and all other drawables to a [ui.Image] object.
