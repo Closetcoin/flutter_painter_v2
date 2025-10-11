@@ -100,6 +100,10 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.objectSettings.singleObjectMode,
     );
+    final isRemovingBackground = useListenableSelector(
+      controller,
+      () => controller.isRemovingBackground,
+    );
 
     final imagePickerNotifier = ref.read(appImagePickerProvider.notifier);
 
@@ -247,6 +251,35 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                               : 'Single Object: OFF',
                         ),
                       ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: isRemovingBackground
+                              ? Colors.blue.withValues(alpha: 0.2)
+                              : null,
+                        ),
+                        onPressed: isRemovingBackground || !hasSelectedDrawable
+                            ? null
+                            : () => controller.removeBackgroundFromSelected(
+                                  onError: (error) {
+                                    if (!context.mounted) return;
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Error: $error'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  },
+                                ),
+                        child: isRemovingBackground
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Remove Background'),
+                      ),
                     ],
                   ),
                   if (isObjectEraseMode) ...[
@@ -268,73 +301,72 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                       ],
                     ),
                   ],
-                  const Spacer(),
-                  Column(
-                    children: [
-                      TextButton(
-                        child: const Text('Add photo'),
-                        onPressed: () async {
-                          final pickedImage =
-                              await imagePickerNotifier.pickFromGallery();
-                          if (pickedImage != null) {
-                            final image = await pickedImage.toUiImage();
-
-                            controller.addImage(
-                              image,
-                              Size(
-                                min(painterSide.value, image.width.toDouble()),
-                                min(painterSide.value, image.height.toDouble()),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              isRendering.value ? Colors.grey : null,
-                        ),
-                        onPressed: () async {
-                          isRendering.value = true;
-                          final image =
-                              await controller.renderImage(Size(1920, 1920));
-                          final bytes = await image.pngBytes;
-                          isRendering.value = false;
-                          if (!context.mounted) return;
-
-                          if (bytes == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Failed to render image')),
-                            );
-                            return;
-                          }
-
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Rendered Image'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AppImage.memory(
-                                    memory: bytes,
-                                    showLoading: true,
-                                    imageViewerOnTap: true,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text('Render'),
-                      ),
-                    ],
-                  )
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  child: const Text('Add photo'),
+                  onPressed: () async {
+                    final pickedImage =
+                        await imagePickerNotifier.pickFromGallery();
+                    if (pickedImage != null) {
+                      final image = await pickedImage.toUiImage();
+
+                      controller.addImage(
+                        image,
+                        Size(
+                          min(painterSide.value, image.width.toDouble()),
+                          min(painterSide.value, image.height.toDouble()),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: isRendering.value ? Colors.grey : null,
+                  ),
+                  onPressed: () async {
+                    isRendering.value = true;
+                    final image =
+                        await controller.renderImage(Size(1920, 1920));
+                    final bytes = await image.pngBytes;
+                    isRendering.value = false;
+                    if (!context.mounted) return;
+
+                    if (bytes == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to render image')),
+                      );
+                      return;
+                    }
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Rendered Image'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppImage.memory(
+                              memory: bytes,
+                              showLoading: true,
+                              imageViewerOnTap: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Render'),
+                ),
+              ],
+            )
           ],
         ),
       ),

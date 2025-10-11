@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'events/selected_object_drawable_removed_event.dart';
 import '../views/widgets/painter_controller_widget.dart';
 import 'actions/actions.dart';
+import 'background_remover/image_background_remover_provider.dart';
 import 'drawables/image_drawable.dart';
 import 'events/events.dart';
 import 'drawables/background/background_drawable.dart';
@@ -44,6 +45,14 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   ///
   /// However, you can use it to grab information about the transformations.
   final TransformationController transformationController;
+
+  /// Whether the controller is currently removing a background from an image.
+  bool _isRemovingBackground = false;
+
+  /// Whether the controller is currently removing a background from an image.
+  ///
+  /// This can be used in the UI to show loading indicators.
+  bool get isRemovingBackground => _isRemovingBackground;
 
   /// Create a [PainterController].
   ///
@@ -338,6 +347,101 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
     if (value.settings.object.autoSelectAfterAdd) {
       selectObjectDrawable(drawable);
     }
+  }
+
+  /// Removes the background from the currently selected [ImageDrawable].
+  ///
+  /// This method processes the selected image using the background remover utility.
+  /// The action can be undone/redone. All transformations (position, scale, rotation)
+  /// are preserved.
+  ///
+  /// [threshold]: 0..1 (higher removes more background; default 0.5).
+  /// [smoothMask]: bilinear smoothing of mask edges.
+  /// [enhanceEdges]: extra refinement on boundaries.
+  /// [padPx]: pad the image with a transparent border.
+  /// [onError]: Optional callback for error handling.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// await controller.removeBackgroundFromSelected(
+  ///   onError: (error) => print('Failed: $error'),
+  /// );
+  /// ```
+  ///
+  /// Returns `true` if successful, `false` if no ImageDrawable is selected or removal failed.
+  Future<bool> removeBackgroundFromSelected({
+    double threshold = 0.5,
+    bool smoothMask = true,
+    bool enhanceEdges = true,
+    int padPx = 6,
+    void Function(Object error)? onError,
+  }) async {
+    final selected = selectedObjectDrawable;
+    if (selected is! ImageDrawable) {
+      return false;
+    }
+
+    try {
+      _isRemovingBackground = true;
+      notifyListeners();
+
+      // Call the background remover utility
+      final processedImage = await BackgroundRemoverUtil.removeBackground(
+        inputImage: selected.image,
+        threshold: threshold,
+        smoothMask: smoothMask,
+        enhanceEdges: enhanceEdges,
+        padPx: padPx,
+      );
+
+      // Create a new drawable with the processed image
+      // Keep all the same properties (position, scale, rotation, etc.)
+      final processedDrawable = selected.copyWith(image: processedImage);
+
+      // Use the RemoveBackgroundAction for undo/redo support
+      final action = RemoveBackgroundAction(selected, processedDrawable);
+      final result = action.perform(this);
+      if (result) {
+        _addAction(action, true);
+      }
+
+      return result;
+    } catch (error) {
+      onError?.call(error);
+      return false;
+    } finally {
+      _isRemovingBackground = false;
+      notifyListeners();
+    }
+  }
+
+  /// Applies a background-removed image to the currently selected [ImageDrawable].
+  ///
+  /// This creates a [RemoveBackgroundAction] that replaces the selected drawable
+  /// with a new one using the [processedImage]. The action can be undone/redone.
+  ///
+  /// Returns `true` if the background removal was applied successfully, `false` otherwise.
+  ///
+  /// The [processedImage] should be the result from a background removal process.
+  ///
+  /// If there is no selected drawable or it's not an [ImageDrawable], returns `false`.
+  bool applyBackgroundRemovedImage(ui.Image processedImage) {
+    final selected = selectedObjectDrawable;
+    if (selected is! ImageDrawable) {
+      return false;
+    }
+
+    // Create a new drawable with the processed image
+    // Keep all the same properties (position, scale, rotation, etc.)
+    final processedDrawable = selected.copyWith(image: processedImage);
+
+    // Use the RemoveBackgroundAction for undo/redo support
+    final action = RemoveBackgroundAction(selected, processedDrawable);
+    final result = action.perform(this);
+    if (result) {
+      _addAction(action, true);
+    }
+    return result;
   }
 
   /// Renders the background and all other drawables to a [ui.Image] object.
