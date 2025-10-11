@@ -98,12 +98,13 @@ class ImageDrawable extends ObjectDrawable {
     if (flipped) canvas.scale(-1, 1);
 
     // Draw the image onto the canvas.
+    // Use filterQuality for better rendering when scaling
     canvas.drawImageRect(
         image,
         Rect.fromPoints(Offset.zero,
             Offset(image.width.toDouble(), image.height.toDouble())),
         Rect.fromPoints(position - scaledSize / 2, position + scaledSize / 2),
-        Paint());
+        Paint()..filterQuality = FilterQuality.high);
   }
 
   /// Calculates the size of the rendered object.

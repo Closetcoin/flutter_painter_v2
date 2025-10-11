@@ -44,7 +44,9 @@ class Painter extends CustomPainter {
           .storage);
     }
 
-    canvas.saveLayer(Rect.largest, Paint());
+    // Use Offset.zero & size instead of Rect.largest to avoid color space issues
+    // Rect.largest can cause color shifting (e.g., yellow to green)
+    canvas.saveLayer(Offset.zero & (_scale ?? size), Paint());
 
     // Draw all the drawables
     for (final drawable
