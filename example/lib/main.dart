@@ -96,6 +96,10 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.freeStyleSettings.strokeWidth,
     );
+    final showSelectionIndicator = useListenableSelector(
+      controller,
+      () => controller.objectSettings.showSelectionIndicator,
+    );
 
     final imagePickerNotifier = ref.read(appImagePickerProvider.notifier);
 
@@ -220,6 +224,18 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                       : null,
                   child: Text('Clear Erases'),
                 ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => controller.objectSettings =
+                      controller.objectSettings.copyWith(
+                    showSelectionIndicator: !showSelectionIndicator,
+                  ),
+                  child: Text(
+                    showSelectionIndicator
+                        ? 'Hide Indicator'
+                        : 'Show Indicator',
+                  ),
+                ),
               ],
             ),
             if (isEraseMode || isObjectEraseMode) ...[
@@ -331,7 +347,10 @@ PainterController _usePainterController() => useRef(
       PainterController(
         settings: PainterSettings(
           freeStyle: FreeStyleSettings(strokeWidth: 5),
-          object: ObjectSettings(autoSelectAfterAdd: true),
+          object: ObjectSettings(
+            autoSelectAfterAdd: true,
+            showSelectionIndicator: true,
+          ),
         ),
       ),
     ).value;

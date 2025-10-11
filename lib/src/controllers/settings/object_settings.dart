@@ -51,12 +51,22 @@ class ObjectSettings {
   /// Defaults to `false`.
   final bool autoSelectAfterAdd;
 
+  /// Whether to show the selection indicator (border and controls) around selected objects.
+  ///
+  /// When `true`, selected objects will display a border and control handles.
+  /// When `false`, the selection indicator is hidden, but objects can still be selected
+  /// and manipulated through gestures.
+  ///
+  /// Defaults to `true`.
+  final bool showSelectionIndicator;
+
   /// Creates a [TextSettings] with the given [layoutAssist].
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
     this.enlargeControlsResolver = _enlargeControls,
     this.showScaleRotationControlsResolver = _showScaleRotationControls,
     this.autoSelectAfterAdd = false,
+    this.showSelectionIndicator = true,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -65,6 +75,7 @@ class ObjectSettings {
     ObjectEnlargeControlsResolver? enlargeControlsResolver,
     ObjectShowScaleRotationControlsResolver? showScaleRotationControlsResolver,
     bool? autoSelectAfterAdd,
+    bool? showSelectionIndicator,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -73,6 +84,8 @@ class ObjectSettings {
       showScaleRotationControlsResolver: showScaleRotationControlsResolver ??
           this.showScaleRotationControlsResolver,
       autoSelectAfterAdd: autoSelectAfterAdd ?? this.autoSelectAfterAdd,
+      showSelectionIndicator:
+          showSelectionIndicator ?? this.showSelectionIndicator,
     );
   }
 
