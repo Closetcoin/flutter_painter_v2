@@ -54,6 +54,15 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// This can be used in the UI to show loading indicators.
   bool get isRemovingBackground => _isRemovingBackground;
 
+  /// Whether the currently selected object has had its background removed.
+  ///
+  /// Returns `true` if the selected drawable is an [ImageDrawable] with
+  /// [ImageDrawable.backgroundRemoved] set to true, `false` otherwise.
+  bool get selectedObjectBackgroundRemoved {
+    final selected = selectedObjectDrawable;
+    return selected is ImageDrawable && selected.backgroundRemoved;
+  }
+
   /// Create a [PainterController].
   ///
   /// The behavior of a [FlutterPainter] widget is controlled by [settings].
@@ -361,6 +370,10 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// The action can be undone/redone. All transformations (position, scale, rotation)
   /// are preserved.
   ///
+  /// **Note:** If the background has already been removed from the selected object,
+  /// this method will return `false` without processing. Use [selectedObjectBackgroundRemoved]
+  /// to check if background removal has already been applied.
+  ///
   /// **Note:** If the selected object has erase masks applied, cropping will be
   /// automatically disabled to preserve the erased areas, regardless of the [applyCrop] parameter.
   ///
@@ -377,12 +390,15 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   ///
   /// Example usage:
   /// ```dart
-  /// await controller.removeBackgroundFromSelected(
-  ///   onError: (error) => print('Failed: $error'),
-  /// );
+  /// if (!controller.selectedObjectBackgroundRemoved) {
+  ///   await controller.removeBackgroundFromSelected(
+  ///     onError: (error) => print('Failed: $error'),
+  ///   );
+  /// }
   /// ```
   ///
-  /// Returns `true` if successful, `false` if no ImageDrawable is selected or removal failed.
+  /// Returns `true` if successful, `false` if no ImageDrawable is selected,
+  /// background has already been removed, or removal failed.
   Future<bool> removeBackgroundFromSelected({
     double threshold = 0.5,
     bool smoothMask = true,
@@ -397,6 +413,11 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   }) async {
     final selected = selectedObjectDrawable;
     if (selected is! ImageDrawable) {
+      return false;
+    }
+
+    // Don't allow removing background if it's already been removed
+    if (selected.backgroundRemoved) {
       return false;
     }
 
@@ -423,7 +444,11 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
 
       // Create a new drawable with the processed image
       // Keep all the same properties (position, scale, rotation, etc.)
-      final processedDrawable = selected.copyWith(image: processedImage);
+      // Set backgroundRemoved flag to true
+      final processedDrawable = selected.copyWith(
+        image: processedImage,
+        backgroundRemoved: true,
+      );
 
       // Use the RemoveBackgroundAction for undo/redo support
       final action = RemoveBackgroundAction(selected, processedDrawable);

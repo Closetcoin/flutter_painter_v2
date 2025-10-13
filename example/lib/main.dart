@@ -259,7 +259,20 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                         ),
                         onPressed: isRemovingBackground || !hasSelectedDrawable
                             ? null
-                            : () => controller.removeBackgroundFromSelected(
+                            : () {
+                                if (controller
+                                    .selectedObjectBackgroundRemoved) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text('Background already removed'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                controller.removeBackgroundFromSelected(
                                   onError: (error) {
                                     if (!context.mounted) return;
 
@@ -270,7 +283,8 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                                       ),
                                     );
                                   },
-                                ),
+                                );
+                              },
                         child: isRemovingBackground
                             ? const SizedBox(
                                 width: 16,

@@ -10,6 +10,9 @@ class ImageDrawable extends ObjectDrawable {
   /// Whether the image is flipped or not.
   final bool flipped;
 
+  /// Whether the background has been removed from this image.
+  final bool backgroundRemoved;
+
   /// Creates an [ImageDrawable] with the given [image].
   ImageDrawable({
     required Offset position,
@@ -23,6 +26,7 @@ class ImageDrawable extends ObjectDrawable {
     List<List<Offset>> eraseMask = const [],
     required this.image,
     this.flipped = false,
+    this.backgroundRemoved = false,
   }) : super(
             position: position,
             rotationAngle: rotationAngle,
@@ -50,6 +54,7 @@ class ImageDrawable extends ObjectDrawable {
     List<List<Offset>> eraseMask = const [],
     required Image image,
     bool flipped = false,
+    bool backgroundRemoved = false,
   }) : this(
             position: position,
             rotationAngle: rotationAngle,
@@ -60,7 +65,8 @@ class ImageDrawable extends ObjectDrawable {
             flipped: flipped,
             hidden: hidden,
             locked: locked,
-            eraseMask: eraseMask);
+            eraseMask: eraseMask,
+            backgroundRemoved: backgroundRemoved);
 
   /// Creates a copy of this but with the given fields replaced with the new values.
   @override
@@ -74,6 +80,7 @@ class ImageDrawable extends ObjectDrawable {
     bool? flipped,
     bool? locked,
     List<List<Offset>>? eraseMask,
+    bool? backgroundRemoved,
   }) {
     return ImageDrawable(
       hidden: hidden ?? this.hidden,
@@ -85,6 +92,7 @@ class ImageDrawable extends ObjectDrawable {
       flipped: flipped ?? this.flipped,
       locked: locked ?? this.locked,
       eraseMask: eraseMask ?? this.eraseMask,
+      backgroundRemoved: backgroundRemoved ?? this.backgroundRemoved,
     );
   }
 
