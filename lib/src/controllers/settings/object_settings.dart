@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 
 import '../drawables/sized2ddrawable.dart';
 import 'haptic_feedback_settings.dart';
+import 'background_remover_settings.dart';
+import 'smart_cropping_settings.dart';
 
 typedef ObjectEnlargeControlsResolver = bool Function();
 typedef ObjectShowScaleRotationControlsResolver = bool Function();
@@ -70,7 +72,13 @@ class ObjectSettings {
   /// Defaults to `false`.
   final bool singleObjectMode;
 
-  /// Creates a [TextSettings] with the given [layoutAssist].
+  /// Settings for background removal operations.
+  final BackgroundRemoverSettings backgroundRemoverSettings;
+
+  /// Settings for smart cropping after background removal.
+  final SmartCroppingSettings smartCroppingSettings;
+
+  /// Creates a [ObjectSettings] with the given values.
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
     this.enlargeControlsResolver = _enlargeControls,
@@ -78,6 +86,8 @@ class ObjectSettings {
     this.autoSelectAfterAdd = false,
     this.showSelectionIndicator = true,
     this.singleObjectMode = false,
+    this.backgroundRemoverSettings = const BackgroundRemoverSettings(),
+    this.smartCroppingSettings = const SmartCroppingSettings(),
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -88,6 +98,8 @@ class ObjectSettings {
     bool? autoSelectAfterAdd,
     bool? showSelectionIndicator,
     bool? singleObjectMode,
+    BackgroundRemoverSettings? backgroundRemoverSettings,
+    SmartCroppingSettings? smartCroppingSettings,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -99,6 +111,10 @@ class ObjectSettings {
       showSelectionIndicator:
           showSelectionIndicator ?? this.showSelectionIndicator,
       singleObjectMode: singleObjectMode ?? this.singleObjectMode,
+      backgroundRemoverSettings:
+          backgroundRemoverSettings ?? this.backgroundRemoverSettings,
+      smartCroppingSettings:
+          smartCroppingSettings ?? this.smartCroppingSettings,
     );
   }
 

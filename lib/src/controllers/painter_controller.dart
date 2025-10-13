@@ -370,22 +370,18 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// The action can be undone/redone. All transformations (position, scale, rotation)
   /// are preserved.
   ///
+  /// Settings for background removal and cropping are taken from the controller's
+  /// [ObjectSettings.backgroundRemoverSettings] and [ObjectSettings.smartCroppingSettings].
+  /// You can customize these when creating the controller or update them using
+  /// [PainterController.value.settings.object.copyWith].
+  ///
   /// **Note:** If the background has already been removed from the selected object,
   /// this method will return `false` without processing. Use [selectedObjectBackgroundRemoved]
   /// to check if background removal has already been applied.
   ///
   /// **Note:** If the selected object has erase masks applied, cropping will be
-  /// automatically disabled to preserve the erased areas, regardless of the [applyCrop] parameter.
+  /// automatically disabled to preserve the erased areas, regardless of the cropping settings.
   ///
-  /// [threshold]: 0..1 (higher removes more background; default 0.5).
-  /// [smoothMask]: bilinear smoothing of mask edges.
-  /// [enhanceEdges]: extra refinement on boundaries.
-  /// [padPx]: pad the image with a transparent border.
-  /// [applyCrop]: whether to apply smart square crop after background removal (default true).
-  /// [alphaThreshold]: alpha threshold for crop detection (0..255; default 12).
-  /// [marginFrac]: extra margin around subject for crop (default 0.08 = 8%).
-  /// [minSidePx]: minimum crop size in pixels (default 100).
-  /// [stride]: sampling stride for faster crop detection (default 2).
   /// [onError]: Optional callback for error handling.
   ///
   /// Example usage:
@@ -400,15 +396,6 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// Returns `true` if successful, `false` if no ImageDrawable is selected,
   /// background has already been removed, or removal failed.
   Future<bool> removeBackgroundFromSelected({
-    double threshold = 0.5,
-    bool smoothMask = true,
-    bool enhanceEdges = true,
-    int padPx = 6,
-    bool applyCrop = true,
-    int alphaThreshold = 12,
-    double marginFrac = 0.08,
-    int minSidePx = 100,
-    int stride = 2,
     void Function(Object error)? onError,
   }) async {
     final selected = selectedObjectDrawable;
@@ -425,21 +412,26 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
       _isRemovingBackground = true;
       notifyListeners();
 
+      // Get settings from the controller
+      final bgSettings = value.settings.object.backgroundRemoverSettings;
+      final cropSettings = value.settings.object.smartCroppingSettings;
+
       // If the object has erase masks, don't apply crop to preserve the erased areas
-      final shouldApplyCrop = applyCrop && selected.eraseMask.isEmpty;
+      final shouldApplyCrop =
+          cropSettings.enabled && selected.eraseMask.isEmpty;
 
       // Call the background remover utility
       final processedImage = await BackgroundRemoverUtil.removeBackground(
         inputImage: selected.image,
-        threshold: threshold,
-        smoothMask: smoothMask,
-        enhanceEdges: enhanceEdges,
-        padPx: padPx,
+        threshold: bgSettings.threshold,
+        smoothMask: bgSettings.smoothMask,
+        enhanceEdges: bgSettings.enhanceEdges,
+        padPx: bgSettings.padPx,
         applyCrop: shouldApplyCrop,
-        alphaThreshold: alphaThreshold,
-        marginFrac: marginFrac,
-        minSidePx: minSidePx,
-        stride: stride,
+        alphaThreshold: cropSettings.alphaThreshold,
+        marginFrac: cropSettings.marginFrac,
+        minSidePx: cropSettings.minSidePx,
+        stride: cropSettings.stride,
       );
 
       // Create a new drawable with the processed image
