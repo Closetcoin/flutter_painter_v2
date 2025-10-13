@@ -361,6 +361,9 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   /// The action can be undone/redone. All transformations (position, scale, rotation)
   /// are preserved.
   ///
+  /// **Note:** If the selected object has erase masks applied, cropping will be
+  /// automatically disabled to preserve the erased areas, regardless of the [applyCrop] parameter.
+  ///
   /// [threshold]: 0..1 (higher removes more background; default 0.5).
   /// [smoothMask]: bilinear smoothing of mask edges.
   /// [enhanceEdges]: extra refinement on boundaries.
@@ -401,6 +404,9 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
       _isRemovingBackground = true;
       notifyListeners();
 
+      // If the object has erase masks, don't apply crop to preserve the erased areas
+      final shouldApplyCrop = applyCrop && selected.eraseMask.isEmpty;
+
       // Call the background remover utility
       final processedImage = await BackgroundRemoverUtil.removeBackground(
         inputImage: selected.image,
@@ -408,7 +414,7 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
         smoothMask: smoothMask,
         enhanceEdges: enhanceEdges,
         padPx: padPx,
-        applyCrop: applyCrop,
+        applyCrop: shouldApplyCrop,
         alphaThreshold: alphaThreshold,
         marginFrac: marginFrac,
         minSidePx: minSidePx,
