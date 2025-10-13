@@ -192,6 +192,11 @@ class _FreeStyleWidgetState extends State<_FreeStyleWidget> {
 
   /// Converts a path from global canvas coordinates to object-local coordinates.
   /// This ensures the erase path moves with the object when it's transformed.
+  ///
+  /// Note: The local coordinates are stored in "unflipped" space, meaning they
+  /// represent positions relative to the original unflipped object. For flipped
+  /// objects, we need to negate the X coordinate because the screen position maps
+  /// to the opposite side of the unflipped image.
   List<Offset> _convertToObjectLocalCoordinates(
       List<Offset> canvasPath, ObjectDrawable object) {
     // Convert each point to be relative to the object's position, rotation, and scale
@@ -207,8 +212,15 @@ class _FreeStyleWidgetState extends State<_FreeStyleWidget> {
       final rotatedY = translatedPoint.dx * sin + translatedPoint.dy * cos;
 
       // Scale by the inverse of the object's scale to get true local coordinates
-      final localX = rotatedX / object.scale;
+      var localX = rotatedX / object.scale;
       final localY = rotatedY / object.scale;
+
+      // If the object is horizontally flipped, negate the X coordinate
+      // because the screen shows a flipped version - what appears on the right
+      // is actually the left side of the unflipped image
+      if (object.isFlippedHorizontally) {
+        localX = -localX;
+      }
 
       return Offset(localX, localY);
     }).toList();

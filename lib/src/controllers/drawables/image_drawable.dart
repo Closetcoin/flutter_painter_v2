@@ -95,7 +95,10 @@ class ImageDrawable extends ObjectDrawable {
         Offset(image.width.toDouble(), image.height.toDouble()) * scale;
     final position = this.position.scale(flipped ? -1 : 1, 1);
 
-    if (flipped) canvas.scale(-1, 1);
+    if (flipped) {
+      canvas.save();
+      canvas.scale(-1, 1);
+    }
 
     // Draw the image onto the canvas.
     // Use filterQuality for better rendering when scaling
@@ -105,6 +108,10 @@ class ImageDrawable extends ObjectDrawable {
             Offset(image.width.toDouble(), image.height.toDouble())),
         Rect.fromPoints(position - scaledSize / 2, position + scaledSize / 2),
         Paint()..filterQuality = FilterQuality.high);
+
+    if (flipped) {
+      canvas.restore();
+    }
   }
 
   /// Calculates the size of the rendered object.
@@ -115,6 +122,10 @@ class ImageDrawable extends ObjectDrawable {
       image.height * scale,
     );
   }
+
+  /// Returns whether this image drawable is horizontally flipped.
+  @override
+  bool get isFlippedHorizontally => flipped;
 
   /// Compares two [ImageDrawable]s for equality.
   // @override

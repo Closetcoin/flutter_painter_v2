@@ -145,9 +145,17 @@ abstract class ObjectDrawable extends Drawable {
         ..blendMode = BlendMode.clear
         ..strokeWidth = 10 * scale; // Scale the stroke width with the object
 
-      // The erase paths are stored in object-local coordinates (unscaled, unrotated)
-      // The canvas is already rotated and positioned, so we just need to scale
-      // the local coordinates relative to the object's position
+      // Check if this drawable is horizontally flipped
+      final isFlipped = isFlippedHorizontally;
+
+      // Apply the same flip transformation as the object if needed
+      if (isFlipped) {
+        canvas.save();
+        canvas.scale(-1, 1);
+      }
+
+      // The erase paths are stored in object-local coordinates (unscaled, unrotated, unflipped)
+      // We need to transform them to canvas coordinates the same way the object is drawn
       for (final localErasePath in eraseMask) {
         if (localErasePath.length < 2) continue;
 
@@ -155,12 +163,13 @@ abstract class ObjectDrawable extends Drawable {
         bool firstPoint = true;
 
         for (final localPoint in localErasePath) {
-          // The local point is stored relative to the object's position
-          // in unscaled, unrotated coordinates
-          // Since the canvas is already rotated/positioned, we just scale and translate
+          // Transform local point to canvas coordinates
+          // Apply the same transformations as the object (scale, position, flip)
+          final flippedPosition = isFlipped ? position.scale(-1, 1) : position;
+
           final scaledPoint = Offset(
-            position.dx + localPoint.dx * scale,
-            position.dy + localPoint.dy * scale,
+            flippedPosition.dx + localPoint.dx * scale,
+            flippedPosition.dy + localPoint.dy * scale,
           );
 
           if (firstPoint) {
@@ -172,6 +181,11 @@ abstract class ObjectDrawable extends Drawable {
         }
 
         canvas.drawPath(canvasPath, erasePaint);
+      }
+
+      // Restore flip transformation if it was applied
+      if (isFlipped) {
+        canvas.restore();
       }
 
       // Restore the layer
@@ -195,6 +209,12 @@ abstract class ObjectDrawable extends Drawable {
   /// Implementing/extending classes must implement its behavior to provide the correct size
   /// This size is used by the UI to detect movement, pinching and rotating actions.
   Size getSize({double minWidth = 0.0, double maxWidth = double.infinity});
+
+  /// Returns whether this drawable is horizontally flipped.
+  ///
+  /// This is used to correctly apply erase masks when the object is flipped.
+  /// Override this method in subclasses that support flipping.
+  bool get isFlippedHorizontally => false;
 
   /// Compares two [ObjectDrawable]s for equality.
   // @override
