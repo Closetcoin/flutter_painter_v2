@@ -7,3 +7,4 @@ export 'shape_settings.dart';
 export 'scale_settings.dart';
 export 'background_remover_settings.dart';
 export 'smart_cropping_settings.dart';
+export 'stretch_controls_settings.dart';

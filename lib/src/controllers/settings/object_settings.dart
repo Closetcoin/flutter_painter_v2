@@ -6,6 +6,7 @@ import '../drawables/sized2ddrawable.dart';
 import 'haptic_feedback_settings.dart';
 import 'background_remover_settings.dart';
 import 'smart_cropping_settings.dart';
+import 'stretch_controls_settings.dart';
 
 typedef ObjectEnlargeControlsResolver = bool Function();
 typedef ObjectShowScaleRotationControlsResolver = bool Function();
@@ -78,6 +79,9 @@ class ObjectSettings {
   /// Settings for smart cropping after background removal.
   final SmartCroppingSettings smartCroppingSettings;
 
+  /// Settings for stretch controls on images.
+  final StretchControlsSettings stretchControlsSettings;
+
   /// Creates a [ObjectSettings] with the given values.
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
@@ -88,6 +92,7 @@ class ObjectSettings {
     this.singleObjectMode = false,
     this.backgroundRemoverSettings = const BackgroundRemoverSettings(),
     this.smartCroppingSettings = const SmartCroppingSettings(),
+    this.stretchControlsSettings = const StretchControlsSettings(),
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -100,6 +105,7 @@ class ObjectSettings {
     bool? singleObjectMode,
     BackgroundRemoverSettings? backgroundRemoverSettings,
     SmartCroppingSettings? smartCroppingSettings,
+    StretchControlsSettings? stretchControlsSettings,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -115,6 +121,8 @@ class ObjectSettings {
           backgroundRemoverSettings ?? this.backgroundRemoverSettings,
       smartCroppingSettings:
           smartCroppingSettings ?? this.smartCroppingSettings,
+      stretchControlsSettings:
+          stretchControlsSettings ?? this.stretchControlsSettings,
     );
   }
 

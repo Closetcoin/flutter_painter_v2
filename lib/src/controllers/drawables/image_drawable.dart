@@ -13,11 +13,19 @@ class ImageDrawable extends ObjectDrawable {
   /// Whether the background has been removed from this image.
   final bool backgroundRemoved;
 
+  /// The scale factor for the X axis (width).
+  final double scaleX;
+
+  /// The scale factor for the Y axis (height).
+  final double scaleY;
+
   /// Creates an [ImageDrawable] with the given [image].
   ImageDrawable({
     required Offset position,
     double rotationAngle = 0,
     double scale = 1,
+    double? scaleX,
+    double? scaleY,
     Set<ObjectDrawableAssist> assists = const <ObjectDrawableAssist>{},
     Map<ObjectDrawableAssist, Paint> assistPaints =
         const <ObjectDrawableAssist, Paint>{},
@@ -27,7 +35,9 @@ class ImageDrawable extends ObjectDrawable {
     required this.image,
     this.flipped = false,
     this.backgroundRemoved = false,
-  }) : super(
+  })  : scaleX = scaleX ?? scale,
+        scaleY = scaleY ?? scale,
+        super(
             position: position,
             rotationAngle: rotationAngle,
             scale: scale,
@@ -76,6 +86,8 @@ class ImageDrawable extends ObjectDrawable {
     Offset? position,
     double? rotation,
     double? scale,
+    double? scaleX,
+    double? scaleY,
     Image? image,
     bool? flipped,
     bool? locked,
@@ -88,6 +100,8 @@ class ImageDrawable extends ObjectDrawable {
       position: position ?? this.position,
       rotationAngle: rotation ?? rotationAngle,
       scale: scale ?? this.scale,
+      scaleX: scaleX ?? this.scaleX,
+      scaleY: scaleY ?? this.scaleY,
       image: image ?? this.image,
       flipped: flipped ?? this.flipped,
       locked: locked ?? this.locked,
@@ -99,8 +113,10 @@ class ImageDrawable extends ObjectDrawable {
   /// Draws the image on the provided [canvas] of size [size].
   @override
   void drawObject(Canvas canvas, Size size) {
-    final scaledSize =
-        Offset(image.width.toDouble(), image.height.toDouble()) * scale;
+    final scaledSize = Offset(
+      image.width.toDouble() * scaleX,
+      image.height.toDouble() * scaleY,
+    );
     final position = this.position.scale(flipped ? -1 : 1, 1);
 
     if (flipped) {
@@ -126,8 +142,8 @@ class ImageDrawable extends ObjectDrawable {
   @override
   Size getSize({double minWidth = 0.0, double maxWidth = double.infinity}) {
     return Size(
-      image.width * scale,
-      image.height * scale,
+      image.width * scaleX,
+      image.height * scaleY,
     );
   }
 

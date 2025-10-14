@@ -58,6 +58,19 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   /// Getter for the border width of the selected object highlighting.
   double get selectedBorderWidth => 1 / transformationScale;
 
+  /// Getter for the stretch controls settings.
+  StretchControlsSettings get stretchControlsSettings =>
+      settings.stretchControlsSettings;
+
+  /// Getter for the size of the stretch controls.
+  double get stretchControlsSize =>
+      (stretchControlsSettings.controlSize / transformationScale)
+          .clamp(8.0, 50.0);
+
+  /// Getter for the offset distance for stretch controls.
+  double get stretchControlsOffset =>
+      stretchControlsSettings.controlOffset / transformationScale;
+
   /// Keeps track of the initial local focal point when scaling starts.
   ///
   /// This is used to offset the movement of the drawable correctly.
@@ -269,6 +282,7 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                         ),
                                         if (settings
                                             .showScaleRotationControlsResolver()) ...[
+                                          // Top-left corner - scale control
                                           Positioned(
                                             top: objectPadding - (controlsSize),
                                             left:
@@ -299,6 +313,7 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                           ),
+                                          // Bottom-left corner - scale control
                                           Positioned(
                                             bottom:
                                                 objectPadding - (controlsSize),
@@ -330,6 +345,7 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                           ),
+                                          // Top-right corner - rotation control
                                           Positioned(
                                             top: objectPadding - (controlsSize),
                                             right:
@@ -360,6 +376,7 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                           ),
+                                          // Bottom-right corner - scale control
                                           Positioned(
                                             bottom:
                                                 objectPadding - (controlsSize),
@@ -391,6 +408,247 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                           ),
+                                        ],
+                                        // Image-specific controls for stretching
+                                        if (entry.value is ImageDrawable &&
+                                            stretchControlsSettings
+                                                .enabled) ...[
+                                          // Top edge - vertical stretch
+                                          if (stretchControlsSettings
+                                              .showVerticalControls)
+                                            Positioned(
+                                              top: objectPadding -
+                                                  (controlsSize / 2) -
+                                                  stretchControlsOffset -
+                                                  (stretchControlsSize / 2),
+                                              left: objectPadding +
+                                                  (size.width / 2) -
+                                                  (stretchControlsSize / 2),
+                                              width: stretchControlsSize,
+                                              height: stretchControlsSize,
+                                              child: MouseRegion(
+                                                cursor:
+                                                    SystemMouseCursors.resizeUp,
+                                                child: GestureDetector(
+                                                  onPanStart: (details) =>
+                                                      onImageStretchControlPanStart(
+                                                          4, entry, details),
+                                                  onPanUpdate: (details) =>
+                                                      onImageStretchControlPanUpdate(
+                                                          entry,
+                                                          details,
+                                                          constraints,
+                                                          Axis.vertical,
+                                                          true),
+                                                  onPanEnd: (details) =>
+                                                      onImageStretchControlPanEnd(
+                                                          4, entry, details),
+                                                  child: _ObjectControlBox(
+                                                    active:
+                                                        controlsAreActive[4] ??
+                                                            false,
+                                                    inactiveColor:
+                                                        stretchControlsSettings
+                                                            .inactiveColor,
+                                                    activeColor:
+                                                        stretchControlsSettings
+                                                            .activeColor,
+                                                    shadowColor:
+                                                        stretchControlsSettings
+                                                            .shadowColor,
+                                                    shadowBlurRadius:
+                                                        stretchControlsSettings
+                                                            .shadowBlurRadius,
+                                                    borderColor:
+                                                        stretchControlsSettings
+                                                            .borderColor,
+                                                    borderWidth:
+                                                        stretchControlsSettings
+                                                            .borderWidth,
+                                                    shape:
+                                                        stretchControlsSettings
+                                                            .controlShape,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          // Bottom edge - vertical stretch
+                                          if (stretchControlsSettings
+                                              .showVerticalControls)
+                                            Positioned(
+                                              bottom: objectPadding -
+                                                  (controlsSize / 2) -
+                                                  stretchControlsOffset -
+                                                  (stretchControlsSize / 2),
+                                              left: objectPadding +
+                                                  (size.width / 2) -
+                                                  (stretchControlsSize / 2),
+                                              width: stretchControlsSize,
+                                              height: stretchControlsSize,
+                                              child: MouseRegion(
+                                                cursor: SystemMouseCursors
+                                                    .resizeDown,
+                                                child: GestureDetector(
+                                                  onPanStart: (details) =>
+                                                      onImageStretchControlPanStart(
+                                                          5, entry, details),
+                                                  onPanUpdate: (details) =>
+                                                      onImageStretchControlPanUpdate(
+                                                          entry,
+                                                          details,
+                                                          constraints,
+                                                          Axis.vertical,
+                                                          false),
+                                                  onPanEnd: (details) =>
+                                                      onImageStretchControlPanEnd(
+                                                          5, entry, details),
+                                                  child: _ObjectControlBox(
+                                                    active:
+                                                        controlsAreActive[5] ??
+                                                            false,
+                                                    inactiveColor:
+                                                        stretchControlsSettings
+                                                            .inactiveColor,
+                                                    activeColor:
+                                                        stretchControlsSettings
+                                                            .activeColor,
+                                                    shadowColor:
+                                                        stretchControlsSettings
+                                                            .shadowColor,
+                                                    shadowBlurRadius:
+                                                        stretchControlsSettings
+                                                            .shadowBlurRadius,
+                                                    borderColor:
+                                                        stretchControlsSettings
+                                                            .borderColor,
+                                                    borderWidth:
+                                                        stretchControlsSettings
+                                                            .borderWidth,
+                                                    shape:
+                                                        stretchControlsSettings
+                                                            .controlShape,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          // Left edge - horizontal stretch
+                                          if (stretchControlsSettings
+                                              .showHorizontalControls)
+                                            Positioned(
+                                              left: objectPadding -
+                                                  (controlsSize / 2) -
+                                                  stretchControlsOffset -
+                                                  (stretchControlsSize / 2),
+                                              top: objectPadding +
+                                                  (size.height / 2) -
+                                                  (stretchControlsSize / 2),
+                                              width: stretchControlsSize,
+                                              height: stretchControlsSize,
+                                              child: MouseRegion(
+                                                cursor: SystemMouseCursors
+                                                    .resizeLeft,
+                                                child: GestureDetector(
+                                                  onPanStart: (details) =>
+                                                      onImageStretchControlPanStart(
+                                                          6, entry, details),
+                                                  onPanUpdate: (details) =>
+                                                      onImageStretchControlPanUpdate(
+                                                          entry,
+                                                          details,
+                                                          constraints,
+                                                          Axis.horizontal,
+                                                          true),
+                                                  onPanEnd: (details) =>
+                                                      onImageStretchControlPanEnd(
+                                                          6, entry, details),
+                                                  child: _ObjectControlBox(
+                                                    active:
+                                                        controlsAreActive[6] ??
+                                                            false,
+                                                    inactiveColor:
+                                                        stretchControlsSettings
+                                                            .inactiveColor,
+                                                    activeColor:
+                                                        stretchControlsSettings
+                                                            .activeColor,
+                                                    shadowColor:
+                                                        stretchControlsSettings
+                                                            .shadowColor,
+                                                    shadowBlurRadius:
+                                                        stretchControlsSettings
+                                                            .shadowBlurRadius,
+                                                    borderColor:
+                                                        stretchControlsSettings
+                                                            .borderColor,
+                                                    borderWidth:
+                                                        stretchControlsSettings
+                                                            .borderWidth,
+                                                    shape:
+                                                        stretchControlsSettings
+                                                            .controlShape,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          // Right edge - horizontal stretch
+                                          if (stretchControlsSettings
+                                              .showHorizontalControls)
+                                            Positioned(
+                                              right: objectPadding -
+                                                  (controlsSize / 2) -
+                                                  stretchControlsOffset -
+                                                  (stretchControlsSize / 2),
+                                              top: objectPadding +
+                                                  (size.height / 2) -
+                                                  (stretchControlsSize / 2),
+                                              width: stretchControlsSize,
+                                              height: stretchControlsSize,
+                                              child: MouseRegion(
+                                                cursor: SystemMouseCursors
+                                                    .resizeRight,
+                                                child: GestureDetector(
+                                                  onPanStart: (details) =>
+                                                      onImageStretchControlPanStart(
+                                                          7, entry, details),
+                                                  onPanUpdate: (details) =>
+                                                      onImageStretchControlPanUpdate(
+                                                          entry,
+                                                          details,
+                                                          constraints,
+                                                          Axis.horizontal,
+                                                          false),
+                                                  onPanEnd: (details) =>
+                                                      onImageStretchControlPanEnd(
+                                                          7, entry, details),
+                                                  child: _ObjectControlBox(
+                                                    active:
+                                                        controlsAreActive[7] ??
+                                                            false,
+                                                    inactiveColor:
+                                                        stretchControlsSettings
+                                                            .inactiveColor,
+                                                    activeColor:
+                                                        stretchControlsSettings
+                                                            .activeColor,
+                                                    shadowColor:
+                                                        stretchControlsSettings
+                                                            .shadowColor,
+                                                    shadowBlurRadius:
+                                                        stretchControlsSettings
+                                                            .shadowBlurRadius,
+                                                    borderColor:
+                                                        stretchControlsSettings
+                                                            .borderColor,
+                                                    borderWidth:
+                                                        stretchControlsSettings
+                                                            .borderWidth,
+                                                    shape:
+                                                        stretchControlsSettings
+                                                            .controlShape,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                         ],
                                         if (entry.value is Sized2DDrawable) ...[
                                           Positioned(
@@ -640,7 +898,15 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       controller?.selectObjectDrawable(entry.value);
     });
 
-    initialScaleDrawables[index] = drawable;
+    // For ImageDrawable objects, ensure the scale property is synchronized with scaleX and scaleY
+    if (drawable is ImageDrawable) {
+      // Use the average of scaleX and scaleY as the base scale for uniform operations
+      final averageScale = (drawable.scaleX + drawable.scaleY) / 2;
+      final synchronizedDrawable = drawable.copyWith(scale: averageScale);
+      initialScaleDrawables[index] = synchronizedDrawable;
+    } else {
+      initialScaleDrawables[index] = drawable;
+    }
 
     // When the gesture detector is rotated, the hit test details are not transformed with it
     // This causes events from rotated objects to behave incorrectly
@@ -722,6 +988,14 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
     // Calculate scale of object reference to the initial object scale
     final scale = initialDrawable.scale * details.scale;
 
+    // For ImageDrawable objects, calculate the scale factor to apply to both scaleX and scaleY
+    double scaleFactor = 1.0;
+    if (initialDrawable is ImageDrawable) {
+      // The details.scale is cumulative, so we need to calculate the factor relative to the initial state
+      // The initial state has scale = (scaleX + scaleY) / 2, and we want to apply the same factor to both
+      scaleFactor = details.scale;
+    }
+
     // Calculate the rotation of the object reference to the initial object rotation
     // and normalize it so that its between 0 and 2*pi
     var rotation = (initialRotation + details.rotation).remainder(pi * 2);
@@ -785,6 +1059,19 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       rotation: assistedRotation,
       assists: assists,
     );
+
+    // For ImageDrawable objects, also update scaleX and scaleY proportionally
+    if (drawable is ImageDrawable &&
+        newDrawable is ImageDrawable &&
+        initialDrawable is ImageDrawable) {
+      // Apply the scale factor to the initial scaleX and scaleY values
+      final imageDrawable = newDrawable.copyWith(
+        scaleX: initialDrawable.scaleX * scaleFactor,
+        scaleY: initialDrawable.scaleY * scaleFactor,
+      );
+      updateDrawable(drawable, imageDrawable);
+      return;
+    }
 
     updateDrawable(drawable, newDrawable);
   }
@@ -1065,6 +1352,83 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
           _m4storage[10] * _m4storage[10]);
     });
   }
+
+  /// Image stretch control pan start handler
+  void onImageStretchControlPanStart(int controlIndex,
+      MapEntry<int, ObjectDrawable> entry, DragStartDetails details) {
+    setState(() {
+      controlsAreActive[controlIndex] = true;
+    });
+    onDrawableScaleStart(
+        entry,
+        ScaleStartDetails(
+          pointerCount: 1,
+          localFocalPoint: entry.value.position,
+        ));
+  }
+
+  /// Image stretch control pan update handler
+  void onImageStretchControlPanUpdate(MapEntry<int, ObjectDrawable> entry,
+      DragUpdateDetails details, BoxConstraints constraints, Axis axis,
+      [bool isReversed = true]) {
+    final index = entry.key;
+    final drawable = entry.value;
+
+    if (drawable is! ImageDrawable) return;
+
+    final initial = initialScaleDrawables[index];
+    if (initial == null || initial is! ImageDrawable) return;
+
+    final vertical = axis == Axis.vertical;
+    final length =
+        ((vertical ? details.localPosition.dy : details.localPosition.dx) *
+            (isReversed ? -1 : 1));
+
+    // Calculate the new scale based on the drag distance for the specific axis
+    final initialSize = initial.getSize(maxWidth: constraints.maxWidth);
+    final initialLength = vertical ? initialSize.height : initialSize.width;
+
+    final scaleFactor =
+        initialLength == 0 ? 1.0 : (length / initialLength + 1.0);
+    final newScaleFactor =
+        scaleFactor.clamp(ObjectDrawable.minScale, double.infinity);
+
+    // Apply scaling only to the specific axis
+    final newScaleX =
+        vertical ? initial.scaleX : initial.scaleX * newScaleFactor;
+    final newScaleY =
+        vertical ? initial.scaleY * newScaleFactor : initial.scaleY;
+
+    // Calculate the new position to keep the opposite edge fixed
+    final offsetPosition = Offset(
+      vertical ? 0 : (isReversed ? -1 : 1) * length / 2,
+      vertical ? (isReversed ? -1 : 1) * length / 2 : 0,
+    );
+
+    // Apply rotation transformation to the offset
+    final rotateOffset = Matrix4.identity()
+      ..rotateZ(initial.rotationAngle)
+      ..translate(offsetPosition.dx, offsetPosition.dy)
+      ..rotateZ(-initial.rotationAngle);
+    final position = Offset(rotateOffset[12], rotateOffset[13]);
+
+    final newDrawable = drawable.copyWith(
+      scaleX: newScaleX,
+      scaleY: newScaleY,
+      position: initial.position + position,
+    );
+
+    updateDrawable(drawable, newDrawable);
+  }
+
+  /// Image stretch control pan end handler
+  void onImageStretchControlPanEnd(int controlIndex,
+      MapEntry<int, ObjectDrawable> entry, DragEndDetails details) {
+    setState(() {
+      controlsAreActive[controlIndex] = false;
+    });
+    onDrawableScaleEnd(entry);
+  }
 }
 
 /// The control box container (only the UI, no logic).
@@ -1087,6 +1451,18 @@ class _ObjectControlBox extends StatelessWidget {
   /// Defaults to [Colors.black].
   final Color shadowColor;
 
+  /// The blur radius of the shadow.
+  /// Defaults to `2.0`.
+  final double shadowBlurRadius;
+
+  /// The color of the control box border.
+  /// Defaults to `Colors.grey`.
+  final Color borderColor;
+
+  /// The thickness of the control box border.
+  /// Defaults to `1.0`.
+  final double borderWidth;
+
   /// Creates an [_ObjectControlBox] with the given [shape] and [active].
   ///
   /// By default, it will be a [BoxShape.rectangle] shape and not active.
@@ -1097,6 +1473,9 @@ class _ObjectControlBox extends StatelessWidget {
     this.inactiveColor = Colors.white,
     this.activeColor,
     this.shadowColor = Colors.black,
+    this.shadowBlurRadius = 2.0,
+    this.borderColor = Colors.grey,
+    this.borderWidth = 1.0,
   }) : super(key: key);
 
   @override
@@ -1110,10 +1489,14 @@ class _ObjectControlBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: active ? activeColor : inactiveColor,
         shape: shape,
+        border: Border.all(
+          color: borderColor,
+          width: borderWidth,
+        ),
         boxShadow: [
           BoxShadow(
             color: shadowColor,
-            blurRadius: 2,
+            blurRadius: shadowBlurRadius,
           )
         ],
       ),
