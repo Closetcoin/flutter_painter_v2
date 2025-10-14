@@ -234,7 +234,9 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                 : (_) => onDrawableScaleEnd(entry),
                             child: AnimatedSwitcher(
                               duration: controlsTransitionDuration,
-                              child: selected && settings.showSelectionIndicator
+                              child: selected &&
+                                      settings
+                                          .selectionIndicatorSettings.enabled
                                   ? Stack(
                                       children: [
                                         widget,

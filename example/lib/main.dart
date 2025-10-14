@@ -94,7 +94,7 @@ class OutfitCreatorScreen extends HookConsumerWidget {
     );
     final showSelectionIndicator = useListenableSelector(
       controller,
-      () => controller.objectSettings.showSelectionIndicator,
+      () => controller.objectSettings.selectionIndicatorSettings.enabled,
     );
     final singleObjectMode = useListenableSelector(
       controller,
@@ -226,7 +226,11 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                       TextButton(
                         onPressed: () => controller.objectSettings =
                             controller.objectSettings.copyWith(
-                          showSelectionIndicator: !showSelectionIndicator,
+                          selectionIndicatorSettings: controller
+                              .objectSettings.selectionIndicatorSettings
+                              .copyWith(
+                            enabled: !showSelectionIndicator,
+                          ),
                         ),
                         child: Text(
                           showSelectionIndicator
@@ -411,7 +415,6 @@ PainterController _usePainterController() => useRef(
           freeStyle: FreeStyleSettings(strokeWidth: 5),
           object: ObjectSettings(
             autoSelectAfterAdd: true,
-            showSelectionIndicator: true,
             singleObjectMode: true,
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,

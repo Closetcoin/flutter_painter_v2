@@ -55,15 +55,6 @@ class ObjectSettings {
   /// Defaults to `false`.
   final bool autoSelectAfterAdd;
 
-  /// Whether to show the selection indicator (border and controls) around selected objects.
-  ///
-  /// When `true`, selected objects will display a border and control handles.
-  /// When `false`, the selection indicator is hidden, but objects can still be selected
-  /// and manipulated through gestures.
-  ///
-  /// Defaults to `true`.
-  final bool showSelectionIndicator;
-
   /// Whether to allow only a single object drawable at a time.
   ///
   /// When `true`, adding a new object drawable (like an image or text) will automatically
@@ -92,7 +83,6 @@ class ObjectSettings {
     this.enlargeControlsResolver = _enlargeControls,
     this.showScaleRotationControlsResolver = _showScaleRotationControls,
     this.autoSelectAfterAdd = false,
-    this.showSelectionIndicator = true,
     this.singleObjectMode = false,
     this.backgroundRemoverSettings = const BackgroundRemoverSettings(),
     this.smartCroppingSettings = const SmartCroppingSettings(),
@@ -106,7 +96,6 @@ class ObjectSettings {
     ObjectEnlargeControlsResolver? enlargeControlsResolver,
     ObjectShowScaleRotationControlsResolver? showScaleRotationControlsResolver,
     bool? autoSelectAfterAdd,
-    bool? showSelectionIndicator,
     bool? singleObjectMode,
     BackgroundRemoverSettings? backgroundRemoverSettings,
     SmartCroppingSettings? smartCroppingSettings,
@@ -120,8 +109,6 @@ class ObjectSettings {
       showScaleRotationControlsResolver: showScaleRotationControlsResolver ??
           this.showScaleRotationControlsResolver,
       autoSelectAfterAdd: autoSelectAfterAdd ?? this.autoSelectAfterAdd,
-      showSelectionIndicator:
-          showSelectionIndicator ?? this.showSelectionIndicator,
       singleObjectMode: singleObjectMode ?? this.singleObjectMode,
       backgroundRemoverSettings:
           backgroundRemoverSettings ?? this.backgroundRemoverSettings,
