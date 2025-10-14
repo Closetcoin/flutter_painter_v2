@@ -7,6 +7,7 @@ import 'haptic_feedback_settings.dart';
 import 'background_remover_settings.dart';
 import 'smart_cropping_settings.dart';
 import 'stretch_controls_settings.dart';
+import 'selection_indicator_settings.dart';
 
 typedef ObjectEnlargeControlsResolver = bool Function();
 typedef ObjectShowScaleRotationControlsResolver = bool Function();
@@ -82,6 +83,9 @@ class ObjectSettings {
   /// Settings for stretch controls on images.
   final StretchControlsSettings stretchControlsSettings;
 
+  /// Settings for the selection indicator appearance and behavior.
+  final SelectionIndicatorSettings selectionIndicatorSettings;
+
   /// Creates a [ObjectSettings] with the given values.
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
@@ -93,6 +97,7 @@ class ObjectSettings {
     this.backgroundRemoverSettings = const BackgroundRemoverSettings(),
     this.smartCroppingSettings = const SmartCroppingSettings(),
     this.stretchControlsSettings = const StretchControlsSettings(),
+    this.selectionIndicatorSettings = const SelectionIndicatorSettings(),
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -106,6 +111,7 @@ class ObjectSettings {
     BackgroundRemoverSettings? backgroundRemoverSettings,
     SmartCroppingSettings? smartCroppingSettings,
     StretchControlsSettings? stretchControlsSettings,
+    SelectionIndicatorSettings? selectionIndicatorSettings,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -123,6 +129,8 @@ class ObjectSettings {
           smartCroppingSettings ?? this.smartCroppingSettings,
       stretchControlsSettings:
           stretchControlsSettings ?? this.stretchControlsSettings,
+      selectionIndicatorSettings:
+          selectionIndicatorSettings ?? this.selectionIndicatorSettings,
     );
   }
 

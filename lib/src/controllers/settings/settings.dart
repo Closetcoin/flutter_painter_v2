@@ -8,3 +8,4 @@ export 'scale_settings.dart';
 export 'background_remover_settings.dart';
 export 'smart_cropping_settings.dart';
 export 'stretch_controls_settings.dart';
+export 'selection_indicator_settings.dart';

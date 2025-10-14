@@ -66,13 +66,13 @@ class StretchControlsSettings {
 
   /// Creates a [StretchControlsSettings] with the given values.
   const StretchControlsSettings({
-    this.controlSize = 10.0,
-    this.controlOffset = 25.0,
+    this.controlSize = 4.0,
+    this.controlOffset = 0.0,
     this.inactiveColor = Colors.white,
     this.activeColor = Colors.blue,
-    this.shadowColor = Colors.black,
-    this.shadowBlurRadius = 2.0,
-    this.borderColor = Colors.grey,
+    this.shadowColor = Colors.transparent,
+    this.shadowBlurRadius = 0.0,
+    this.borderColor = Colors.blue,
     this.borderWidth = 1.0,
     this.controlShape = BoxShape.rectangle,
     this.enabled = true,

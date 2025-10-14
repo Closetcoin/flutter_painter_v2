@@ -414,18 +414,23 @@ PainterController _usePainterController() => useRef(
             showSelectionIndicator: true,
             singleObjectMode: true,
             stretchControlsSettings: StretchControlsSettings(
-              controlSize: 15.0, // Larger controls
-              controlOffset: 0.0, // Centered on edge
-              inactiveColor: Colors.white, // White when inactive
-              activeColor: Colors.red, // Red when active
-              // shadowColor: Colors.black, // Black shadow
-              // shadowBlurRadius: 4.0, // More blur
-              borderColor: Colors.blue, // Blue border
-              borderWidth: 2.0, // Thicker border
-              controlShape: BoxShape.rectangle, // Rectangular controls
-              enabled: true, // Show controls
-              showVerticalControls: true, // Show top/bottom
-              showHorizontalControls: true, // Show left/right
+              controlSize: 4.0,
+              controlOffset: 0.0,
+              inactiveColor: Colors.white,
+              activeColor: Colors.blue,
+              borderColor: Colors.blue,
+              borderWidth: 1.0,
+              controlShape: BoxShape.rectangle,
+              enabled: true,
+              showVerticalControls: true,
+              showHorizontalControls: true,
+            ),
+            selectionIndicatorSettings: SelectionIndicatorSettings(
+              borderRadius: 0,
+              borderColor: Colors.blue,
+              borderWidth: 2.0,
+              padding: 30.0,
+              enabled: true,
             ),
           ),
         ),

@@ -42,7 +42,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   double transformationScale = 1;
 
   /// Getter for extra amount of padding added around each object to make it easier to interact with.
-  double get objectPadding => 25 / transformationScale;
+  double get objectPadding =>
+      settings.selectionIndicatorSettings.padding / transformationScale;
 
   /// Getter for the duration of fade-in and out animations for the object controls.
   static Duration get controlsTransitionDuration =>
@@ -53,10 +54,13 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       (settings.enlargeControlsResolver() ? 20 : 10) / transformationScale;
 
   /// Getter for the blur radius of the selected object highlighting.
-  double get selectedBlurRadius => 2 / transformationScale;
+  double get selectedBlurRadius =>
+      settings.selectionIndicatorSettings.shadowBlurRadius /
+      transformationScale;
 
   /// Getter for the border width of the selected object highlighting.
-  double get selectedBorderWidth => 1 / transformationScale;
+  double get selectedBorderWidth =>
+      settings.selectionIndicatorSettings.borderWidth / transformationScale;
 
   /// Getter for the stretch controls settings.
   StretchControlsSettings get stretchControlsSettings =>
@@ -248,34 +252,69 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               if (usingHtmlRenderer) {
                                                 return Container(
                                                   decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius
+                                                        .circular(settings
+                                                                .selectionIndicatorSettings
+                                                                .borderRadius /
+                                                            transformationScale),
                                                     border: Border.all(
-                                                        color: Colors.black,
+                                                        color: settings
+                                                            .selectionIndicatorSettings
+                                                            .borderColor,
                                                         width:
                                                             selectedBorderWidth),
-                                                  ),
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                          color: Colors.white,
-                                                          width:
-                                                              selectedBorderWidth),
-                                                    ),
+                                                    boxShadow: settings
+                                                                .selectionIndicatorSettings
+                                                                .shadowBlurRadius >
+                                                            0
+                                                        ? [
+                                                            BorderBoxShadow(
+                                                              color: settings
+                                                                  .selectionIndicatorSettings
+                                                                  .shadowColor,
+                                                              blurRadius:
+                                                                  selectedBlurRadius,
+                                                              offset: settings
+                                                                      .selectionIndicatorSettings
+                                                                      .shadowOffset /
+                                                                  transformationScale,
+                                                            )
+                                                          ]
+                                                        : null,
                                                   ),
                                                 );
                                               }
                                               return Container(
                                                 decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(settings
+                                                                .selectionIndicatorSettings
+                                                                .borderRadius /
+                                                            transformationScale),
                                                     border: Border.all(
-                                                        color: Colors.white,
+                                                        color: settings
+                                                            .selectionIndicatorSettings
+                                                            .borderColor,
                                                         width:
                                                             selectedBorderWidth),
-                                                    boxShadow: [
-                                                      BorderBoxShadow(
-                                                        color: Colors.black,
-                                                        blurRadius:
-                                                            selectedBlurRadius,
-                                                      )
-                                                    ]),
+                                                    boxShadow: settings
+                                                                .selectionIndicatorSettings
+                                                                .shadowBlurRadius >
+                                                            0
+                                                        ? [
+                                                            BorderBoxShadow(
+                                                              color: settings
+                                                                  .selectionIndicatorSettings
+                                                                  .shadowColor,
+                                                              blurRadius:
+                                                                  selectedBlurRadius,
+                                                              offset: settings
+                                                                      .selectionIndicatorSettings
+                                                                      .shadowOffset /
+                                                                  transformationScale,
+                                                            )
+                                                          ]
+                                                        : null),
                                               );
                                             },
                                           ),
@@ -1493,12 +1532,14 @@ class _ObjectControlBox extends StatelessWidget {
           color: borderColor,
           width: borderWidth,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: shadowBlurRadius,
-          )
-        ],
+        boxShadow: shadowBlurRadius > 0
+            ? [
+                BoxShadow(
+                  color: shadowColor,
+                  blurRadius: shadowBlurRadius,
+                )
+              ]
+            : null,
       ),
     );
   }
