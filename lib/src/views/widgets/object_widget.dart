@@ -459,56 +459,103 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               top: objectPadding -
                                                   (controlsSize / 2) -
                                                   stretchControlsOffset -
-                                                  (stretchControlsSize / 2),
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
                                               left: objectPadding +
                                                   (size.width / 2) -
-                                                  (stretchControlsSize / 2),
-                                              width: stretchControlsSize,
-                                              height: stretchControlsSize,
-                                              child: MouseRegion(
-                                                cursor:
-                                                    SystemMouseCursors.resizeUp,
-                                                child: GestureDetector(
-                                                  onPanStart: (details) =>
-                                                      onImageStretchControlPanStart(
-                                                          4, entry, details),
-                                                  onPanUpdate: (details) =>
-                                                      onImageStretchControlPanUpdate(
-                                                          entry,
-                                                          details,
-                                                          constraints,
-                                                          Axis.vertical,
-                                                          true),
-                                                  onPanEnd: (details) =>
-                                                      onImageStretchControlPanEnd(
-                                                          4, entry, details),
-                                                  child: _ObjectControlBox(
-                                                    active:
-                                                        controlsAreActive[4] ??
-                                                            false,
-                                                    inactiveColor:
-                                                        stretchControlsSettings
-                                                            .inactiveColor,
-                                                    activeColor:
-                                                        stretchControlsSettings
-                                                            .activeColor,
-                                                    shadowColor:
-                                                        stretchControlsSettings
-                                                            .shadowColor,
-                                                    shadowBlurRadius:
-                                                        stretchControlsSettings
-                                                            .shadowBlurRadius,
-                                                    borderColor:
-                                                        stretchControlsSettings
-                                                            .borderColor,
-                                                    borderWidth:
-                                                        stretchControlsSettings
-                                                            .borderWidth,
-                                                    shape:
-                                                        stretchControlsSettings
-                                                            .controlShape,
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
+                                              width: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              height: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              child: Stack(
+                                                children: [
+                                                  // Large tap area (translucent)
+                                                  GestureDetector(
+                                                    onPanStart: (details) =>
+                                                        onImageStretchControlPanStart(
+                                                            4, entry, details),
+                                                    onPanUpdate: (details) =>
+                                                        onImageStretchControlPanUpdate(
+                                                            entry,
+                                                            details,
+                                                            constraints,
+                                                            Axis.vertical,
+                                                            true),
+                                                    onPanEnd: (details) =>
+                                                        onImageStretchControlPanEnd(
+                                                            4, entry, details),
+                                                    behavior: HitTestBehavior
+                                                        .translucent,
+                                                    child: Container(
+                                                      width: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      height: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      color: Colors.transparent,
+                                                    ),
                                                   ),
-                                                ),
+                                                  // Visual control box (centered)
+                                                  Positioned(
+                                                    top: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    left: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    child: MouseRegion(
+                                                      cursor: SystemMouseCursors
+                                                          .resizeUp,
+                                                      child: SizedBox(
+                                                        width:
+                                                            stretchControlsSize,
+                                                        height:
+                                                            stretchControlsSize,
+                                                        child:
+                                                            _ObjectControlBox(
+                                                          active:
+                                                              controlsAreActive[
+                                                                      4] ??
+                                                                  false,
+                                                          inactiveColor:
+                                                              stretchControlsSettings
+                                                                  .inactiveColor,
+                                                          activeColor:
+                                                              stretchControlsSettings
+                                                                  .activeColor,
+                                                          shadowColor:
+                                                              stretchControlsSettings
+                                                                  .shadowColor,
+                                                          shadowBlurRadius:
+                                                              stretchControlsSettings
+                                                                  .shadowBlurRadius,
+                                                          borderColor:
+                                                              stretchControlsSettings
+                                                                  .borderColor,
+                                                          borderWidth:
+                                                              stretchControlsSettings
+                                                                  .borderWidth,
+                                                          shape:
+                                                              stretchControlsSettings
+                                                                  .controlShape,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           // Bottom edge - vertical stretch
@@ -518,56 +565,103 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               bottom: objectPadding -
                                                   (controlsSize / 2) -
                                                   stretchControlsOffset -
-                                                  (stretchControlsSize / 2),
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
                                               left: objectPadding +
                                                   (size.width / 2) -
-                                                  (stretchControlsSize / 2),
-                                              width: stretchControlsSize,
-                                              height: stretchControlsSize,
-                                              child: MouseRegion(
-                                                cursor: SystemMouseCursors
-                                                    .resizeDown,
-                                                child: GestureDetector(
-                                                  onPanStart: (details) =>
-                                                      onImageStretchControlPanStart(
-                                                          5, entry, details),
-                                                  onPanUpdate: (details) =>
-                                                      onImageStretchControlPanUpdate(
-                                                          entry,
-                                                          details,
-                                                          constraints,
-                                                          Axis.vertical,
-                                                          false),
-                                                  onPanEnd: (details) =>
-                                                      onImageStretchControlPanEnd(
-                                                          5, entry, details),
-                                                  child: _ObjectControlBox(
-                                                    active:
-                                                        controlsAreActive[5] ??
-                                                            false,
-                                                    inactiveColor:
-                                                        stretchControlsSettings
-                                                            .inactiveColor,
-                                                    activeColor:
-                                                        stretchControlsSettings
-                                                            .activeColor,
-                                                    shadowColor:
-                                                        stretchControlsSettings
-                                                            .shadowColor,
-                                                    shadowBlurRadius:
-                                                        stretchControlsSettings
-                                                            .shadowBlurRadius,
-                                                    borderColor:
-                                                        stretchControlsSettings
-                                                            .borderColor,
-                                                    borderWidth:
-                                                        stretchControlsSettings
-                                                            .borderWidth,
-                                                    shape:
-                                                        stretchControlsSettings
-                                                            .controlShape,
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
+                                              width: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              height: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              child: Stack(
+                                                children: [
+                                                  // Large tap area (translucent)
+                                                  GestureDetector(
+                                                    onPanStart: (details) =>
+                                                        onImageStretchControlPanStart(
+                                                            5, entry, details),
+                                                    onPanUpdate: (details) =>
+                                                        onImageStretchControlPanUpdate(
+                                                            entry,
+                                                            details,
+                                                            constraints,
+                                                            Axis.vertical,
+                                                            false),
+                                                    onPanEnd: (details) =>
+                                                        onImageStretchControlPanEnd(
+                                                            5, entry, details),
+                                                    behavior: HitTestBehavior
+                                                        .translucent,
+                                                    child: Container(
+                                                      width: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      height: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      color: Colors.transparent,
+                                                    ),
                                                   ),
-                                                ),
+                                                  // Visual control box (centered)
+                                                  Positioned(
+                                                    top: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    left: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    child: MouseRegion(
+                                                      cursor: SystemMouseCursors
+                                                          .resizeDown,
+                                                      child: SizedBox(
+                                                        width:
+                                                            stretchControlsSize,
+                                                        height:
+                                                            stretchControlsSize,
+                                                        child:
+                                                            _ObjectControlBox(
+                                                          active:
+                                                              controlsAreActive[
+                                                                      5] ??
+                                                                  false,
+                                                          inactiveColor:
+                                                              stretchControlsSettings
+                                                                  .inactiveColor,
+                                                          activeColor:
+                                                              stretchControlsSettings
+                                                                  .activeColor,
+                                                          shadowColor:
+                                                              stretchControlsSettings
+                                                                  .shadowColor,
+                                                          shadowBlurRadius:
+                                                              stretchControlsSettings
+                                                                  .shadowBlurRadius,
+                                                          borderColor:
+                                                              stretchControlsSettings
+                                                                  .borderColor,
+                                                          borderWidth:
+                                                              stretchControlsSettings
+                                                                  .borderWidth,
+                                                          shape:
+                                                              stretchControlsSettings
+                                                                  .controlShape,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           // Left edge - horizontal stretch
@@ -577,56 +671,103 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               left: objectPadding -
                                                   (controlsSize / 2) -
                                                   stretchControlsOffset -
-                                                  (stretchControlsSize / 2),
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
                                               top: objectPadding +
                                                   (size.height / 2) -
-                                                  (stretchControlsSize / 2),
-                                              width: stretchControlsSize,
-                                              height: stretchControlsSize,
-                                              child: MouseRegion(
-                                                cursor: SystemMouseCursors
-                                                    .resizeLeft,
-                                                child: GestureDetector(
-                                                  onPanStart: (details) =>
-                                                      onImageStretchControlPanStart(
-                                                          6, entry, details),
-                                                  onPanUpdate: (details) =>
-                                                      onImageStretchControlPanUpdate(
-                                                          entry,
-                                                          details,
-                                                          constraints,
-                                                          Axis.horizontal,
-                                                          true),
-                                                  onPanEnd: (details) =>
-                                                      onImageStretchControlPanEnd(
-                                                          6, entry, details),
-                                                  child: _ObjectControlBox(
-                                                    active:
-                                                        controlsAreActive[6] ??
-                                                            false,
-                                                    inactiveColor:
-                                                        stretchControlsSettings
-                                                            .inactiveColor,
-                                                    activeColor:
-                                                        stretchControlsSettings
-                                                            .activeColor,
-                                                    shadowColor:
-                                                        stretchControlsSettings
-                                                            .shadowColor,
-                                                    shadowBlurRadius:
-                                                        stretchControlsSettings
-                                                            .shadowBlurRadius,
-                                                    borderColor:
-                                                        stretchControlsSettings
-                                                            .borderColor,
-                                                    borderWidth:
-                                                        stretchControlsSettings
-                                                            .borderWidth,
-                                                    shape:
-                                                        stretchControlsSettings
-                                                            .controlShape,
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
+                                              width: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              height: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              child: Stack(
+                                                children: [
+                                                  // Large tap area (translucent)
+                                                  GestureDetector(
+                                                    onPanStart: (details) =>
+                                                        onImageStretchControlPanStart(
+                                                            6, entry, details),
+                                                    onPanUpdate: (details) =>
+                                                        onImageStretchControlPanUpdate(
+                                                            entry,
+                                                            details,
+                                                            constraints,
+                                                            Axis.horizontal,
+                                                            true),
+                                                    onPanEnd: (details) =>
+                                                        onImageStretchControlPanEnd(
+                                                            6, entry, details),
+                                                    behavior: HitTestBehavior
+                                                        .translucent,
+                                                    child: Container(
+                                                      width: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      height: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      color: Colors.transparent,
+                                                    ),
                                                   ),
-                                                ),
+                                                  // Visual control box (centered)
+                                                  Positioned(
+                                                    top: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    left: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    child: MouseRegion(
+                                                      cursor: SystemMouseCursors
+                                                          .resizeLeft,
+                                                      child: SizedBox(
+                                                        width:
+                                                            stretchControlsSize,
+                                                        height:
+                                                            stretchControlsSize,
+                                                        child:
+                                                            _ObjectControlBox(
+                                                          active:
+                                                              controlsAreActive[
+                                                                      6] ??
+                                                                  false,
+                                                          inactiveColor:
+                                                              stretchControlsSettings
+                                                                  .inactiveColor,
+                                                          activeColor:
+                                                              stretchControlsSettings
+                                                                  .activeColor,
+                                                          shadowColor:
+                                                              stretchControlsSettings
+                                                                  .shadowColor,
+                                                          shadowBlurRadius:
+                                                              stretchControlsSettings
+                                                                  .shadowBlurRadius,
+                                                          borderColor:
+                                                              stretchControlsSettings
+                                                                  .borderColor,
+                                                          borderWidth:
+                                                              stretchControlsSettings
+                                                                  .borderWidth,
+                                                          shape:
+                                                              stretchControlsSettings
+                                                                  .controlShape,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           // Right edge - horizontal stretch
@@ -636,56 +777,103 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               right: objectPadding -
                                                   (controlsSize / 2) -
                                                   stretchControlsOffset -
-                                                  (stretchControlsSize / 2),
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
                                               top: objectPadding +
                                                   (size.height / 2) -
-                                                  (stretchControlsSize / 2),
-                                              width: stretchControlsSize,
-                                              height: stretchControlsSize,
-                                              child: MouseRegion(
-                                                cursor: SystemMouseCursors
-                                                    .resizeRight,
-                                                child: GestureDetector(
-                                                  onPanStart: (details) =>
-                                                      onImageStretchControlPanStart(
-                                                          7, entry, details),
-                                                  onPanUpdate: (details) =>
-                                                      onImageStretchControlPanUpdate(
-                                                          entry,
-                                                          details,
-                                                          constraints,
-                                                          Axis.horizontal,
-                                                          false),
-                                                  onPanEnd: (details) =>
-                                                      onImageStretchControlPanEnd(
-                                                          7, entry, details),
-                                                  child: _ObjectControlBox(
-                                                    active:
-                                                        controlsAreActive[7] ??
-                                                            false,
-                                                    inactiveColor:
-                                                        stretchControlsSettings
-                                                            .inactiveColor,
-                                                    activeColor:
-                                                        stretchControlsSettings
-                                                            .activeColor,
-                                                    shadowColor:
-                                                        stretchControlsSettings
-                                                            .shadowColor,
-                                                    shadowBlurRadius:
-                                                        stretchControlsSettings
-                                                            .shadowBlurRadius,
-                                                    borderColor:
-                                                        stretchControlsSettings
-                                                            .borderColor,
-                                                    borderWidth:
-                                                        stretchControlsSettings
-                                                            .borderWidth,
-                                                    shape:
-                                                        stretchControlsSettings
-                                                            .controlShape,
+                                                  (stretchControlsSize *
+                                                      stretchControlsSettings
+                                                          .tapTargetSize /
+                                                      2),
+                                              width: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              height: stretchControlsSize *
+                                                  stretchControlsSettings
+                                                      .tapTargetSize,
+                                              child: Stack(
+                                                children: [
+                                                  // Large tap area (translucent)
+                                                  GestureDetector(
+                                                    onPanStart: (details) =>
+                                                        onImageStretchControlPanStart(
+                                                            7, entry, details),
+                                                    onPanUpdate: (details) =>
+                                                        onImageStretchControlPanUpdate(
+                                                            entry,
+                                                            details,
+                                                            constraints,
+                                                            Axis.horizontal,
+                                                            false),
+                                                    onPanEnd: (details) =>
+                                                        onImageStretchControlPanEnd(
+                                                            7, entry, details),
+                                                    behavior: HitTestBehavior
+                                                        .translucent,
+                                                    child: Container(
+                                                      width: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      height: stretchControlsSize *
+                                                          stretchControlsSettings
+                                                              .tapTargetSize,
+                                                      color: Colors.transparent,
+                                                    ),
                                                   ),
-                                                ),
+                                                  // Visual control box (centered)
+                                                  Positioned(
+                                                    top: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    left: (stretchControlsSize *
+                                                                stretchControlsSettings
+                                                                    .tapTargetSize -
+                                                            stretchControlsSize) /
+                                                        2,
+                                                    child: MouseRegion(
+                                                      cursor: SystemMouseCursors
+                                                          .resizeRight,
+                                                      child: SizedBox(
+                                                        width:
+                                                            stretchControlsSize,
+                                                        height:
+                                                            stretchControlsSize,
+                                                        child:
+                                                            _ObjectControlBox(
+                                                          active:
+                                                              controlsAreActive[
+                                                                      7] ??
+                                                                  false,
+                                                          inactiveColor:
+                                                              stretchControlsSettings
+                                                                  .inactiveColor,
+                                                          activeColor:
+                                                              stretchControlsSettings
+                                                                  .activeColor,
+                                                          shadowColor:
+                                                              stretchControlsSettings
+                                                                  .shadowColor,
+                                                          shadowBlurRadius:
+                                                              stretchControlsSettings
+                                                                  .shadowBlurRadius,
+                                                          borderColor:
+                                                              stretchControlsSettings
+                                                                  .borderColor,
+                                                          borderWidth:
+                                                              stretchControlsSettings
+                                                                  .borderWidth,
+                                                          shape:
+                                                              stretchControlsSettings
+                                                                  .controlShape,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                         ],

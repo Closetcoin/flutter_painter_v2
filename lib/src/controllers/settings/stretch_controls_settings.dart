@@ -64,6 +64,13 @@ class StretchControlsSettings {
   /// Defaults to `true`.
   final bool showHorizontalControls;
 
+  /// The multiplier for the tap target size relative to the control size.
+  /// A value of 1.0 means the tap target is the same size as the visual control.
+  /// A value of 4.0 means the tap target is 4x larger than the visual control.
+  ///
+  /// Defaults to `1.0`.
+  final double tapTargetSize;
+
   /// Creates a [StretchControlsSettings] with the given values.
   const StretchControlsSettings({
     this.controlSize = 4.0,
@@ -78,6 +85,7 @@ class StretchControlsSettings {
     this.enabled = true,
     this.showVerticalControls = true,
     this.showHorizontalControls = true,
+    this.tapTargetSize = 1.0,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -94,6 +102,7 @@ class StretchControlsSettings {
     bool? enabled,
     bool? showVerticalControls,
     bool? showHorizontalControls,
+    double? tapTargetSize,
   }) {
     return StretchControlsSettings(
       controlSize: controlSize ?? this.controlSize,
@@ -109,6 +118,7 @@ class StretchControlsSettings {
       showVerticalControls: showVerticalControls ?? this.showVerticalControls,
       showHorizontalControls:
           showHorizontalControls ?? this.showHorizontalControls,
+      tapTargetSize: tapTargetSize ?? this.tapTargetSize,
     );
   }
 
@@ -127,7 +137,8 @@ class StretchControlsSettings {
         other.controlShape == controlShape &&
         other.enabled == enabled &&
         other.showVerticalControls == showVerticalControls &&
-        other.showHorizontalControls == showHorizontalControls;
+        other.showHorizontalControls == showHorizontalControls &&
+        other.tapTargetSize == tapTargetSize;
   }
 
   @override
@@ -145,6 +156,7 @@ class StretchControlsSettings {
       enabled,
       showVerticalControls,
       showHorizontalControls,
+      tapTargetSize,
     );
   }
 }
