@@ -418,7 +418,7 @@ PainterController _usePainterController() => useRef(
             singleObjectMode: true,
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,
-              tapTargetSize: 3,
+              tapTargetSize: 6,
               controlOffset: 0.0,
               inactiveColor: Colors.white,
               activeColor: Colors.blue,
@@ -433,7 +433,7 @@ PainterController _usePainterController() => useRef(
               borderRadius: 0,
               borderColor: Colors.blue,
               borderWidth: 2.0,
-              padding: 30.0,
+              padding: 20.0,
               enabled: true,
             ),
           ),
