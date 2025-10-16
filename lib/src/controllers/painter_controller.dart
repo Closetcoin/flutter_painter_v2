@@ -364,6 +364,53 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
     }
   }
 
+  /// Calculates the maximum available size for image content, accounting for
+  /// the selection indicator, stretch controls, and tap target areas.
+  ///
+  /// This is useful when adding an image and you want it to fit within the
+  /// visible canvas without being cropped by UI elements.
+  ///
+  /// [canvasSize] is the total size of the painter canvas (e.g., from RenderBox).
+  /// [transformationScale] is the current zoom level (defaults to 1.0 for initial sizing).
+  ///
+  /// Returns a [Size] representing the maximum dimensions available for image content.
+  Size getMaxContentSize(Size canvasSize, {double transformationScale = 1.0}) {
+    final objectSettings = value.settings.object;
+    final stretchControlsSettings = objectSettings.stretchControlsSettings;
+
+    // Calculate object padding (selection indicator padding)
+    final objectPadding =
+        objectSettings.selectionIndicatorSettings.padding / transformationScale;
+
+    // Calculate stretch controls size (clamped between 8.0 and 50.0)
+    final stretchControlsSize =
+        (stretchControlsSettings.controlSize / transformationScale)
+            .clamp(8.0, 50.0);
+
+    // Calculate stretch controls offset
+    final stretchControlsOffset =
+        stretchControlsSettings.controlOffset / transformationScale;
+
+    // Calculate the extension needed for stretch controls and tap targets
+    // This only applies when stretch controls are enabled
+    final stretchControlsExtension = stretchControlsSettings.enabled
+        ? stretchControlsOffset +
+            (stretchControlsSize * stretchControlsSettings.tapTargetSize / 2)
+        : 0.0;
+
+    // Total padding on each side = objectPadding + stretchControlsExtension
+    final totalPaddingPerSide = objectPadding + stretchControlsExtension;
+
+    // Available content size = canvas size - (padding on both sides)
+    final availableWidth = canvasSize.width - (totalPaddingPerSide * 2);
+    final availableHeight = canvasSize.height - (totalPaddingPerSide * 2);
+
+    return Size(
+      availableWidth.clamp(0.0, double.infinity),
+      availableHeight.clamp(0.0, double.infinity),
+    );
+  }
+
   /// Removes the background from the currently selected [ImageDrawable].
   ///
   /// This method processes the selected image using the background remover utility.

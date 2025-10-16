@@ -334,11 +334,17 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                     if (pickedImage != null) {
                       final image = await pickedImage.toUiImage();
 
+                      // Calculate the maximum available size accounting for UI chrome
+                      final canvasSize =
+                          Size(painterSide.value, painterSide.value);
+                      final maxContentSize =
+                          controller.getMaxContentSize(canvasSize);
+
                       controller.addImage(
                         image,
                         Size(
-                          min(painterSide.value, image.width.toDouble()),
-                          min(painterSide.value, image.height.toDouble()),
+                          min(maxContentSize.width, image.width.toDouble()),
+                          min(maxContentSize.height, image.height.toDouble()),
                         ),
                       );
                     }
@@ -418,7 +424,7 @@ PainterController _usePainterController() => useRef(
             singleObjectMode: true,
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,
-              tapTargetSize: 10,
+              tapTargetSize: 4,
               controlOffset: 0.0,
               inactiveColor: Colors.white,
               activeColor: Colors.blue,
