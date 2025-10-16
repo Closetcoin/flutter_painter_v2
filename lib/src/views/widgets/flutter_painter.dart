@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/events/selected_object_drawable_removed_event.dart';

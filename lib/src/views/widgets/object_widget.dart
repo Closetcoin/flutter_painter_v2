@@ -197,25 +197,50 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
             final drawable = entry.value;
             final selected = drawable == controller?.selectedObjectDrawable;
             final size = drawable.getSize(maxWidth: constraints.maxWidth);
-            final widget = Padding(
-              padding: EdgeInsets.all(objectPadding),
-              child: SizedBox(
-                width: size.width,
-                height: size.height,
-              ),
+
+            // Calculate extra space needed for stretch controls and their tap targets
+            final bool hasStretchControls = selected &&
+                entry.value is ImageDrawable &&
+                stretchControlsSettings.enabled;
+
+            final double stretchControlsExtension = hasStretchControls
+                ? stretchControlsOffset +
+                    (stretchControlsSize *
+                        stretchControlsSettings.tapTargetSize /
+                        2)
+                : 0.0;
+
+            // Total size includes: objectPadding + content + objectPadding + stretch controls
+            final double totalWidth = size.width +
+                (objectPadding * 2) +
+                (stretchControlsExtension * 2);
+            final double totalHeight = size.height +
+                (objectPadding * 2) +
+                (stretchControlsExtension * 2);
+
+            // The inner padding accounts for stretch controls space
+            final double innerPadding =
+                objectPadding + stretchControlsExtension;
+
+            final widget = SizedBox(
+              width: size.width,
+              height: size.height,
             );
+
             return Positioned(
-              // Offset the position by half the size of the drawable so that
-              // the object is in the center point
-              top: drawable.position.dy - objectPadding - size.height / 2,
-              left: drawable.position.dx - objectPadding - size.width / 2,
+              // Offset the position by half the TOTAL size to center the drawable
+              top: drawable.position.dy - totalHeight / 2,
+              left: drawable.position.dx - totalWidth / 2,
               child: Transform.rotate(
                 angle: drawable.rotationAngle,
                 transformHitTests: true,
                 child: Container(
                   child: freeStyleSettings.mode != FreeStyleMode.none &&
                           freeStyleSettings.mode != FreeStyleMode.eraseObject
-                      ? widget
+                      ? Padding(
+                          padding: EdgeInsets.all(innerPadding),
+                          child: widget,
+                        )
                       : MouseRegion(
                           cursor: drawable.locked
                               ? MouseCursor.defer
@@ -243,24 +268,24 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                       settings
                                           .selectionIndicatorSettings.enabled
                                   ? SizedBox(
-                                      // Make the container larger to accommodate the selection indicator
-                                      width: size.width + (objectPadding * 2),
-                                      height: size.height + (objectPadding * 2),
+                                      // Total size includes space for all controls
+                                      width: totalWidth,
+                                      height: totalHeight,
                                       child: Stack(
                                         clipBehavior: Clip.none,
                                         children: [
                                           // Center the widget within the larger container
                                           Positioned(
-                                            top: objectPadding,
-                                            left: objectPadding,
+                                            top: innerPadding,
+                                            left: innerPadding,
                                             child: widget,
                                           ),
-                                          // Selection indicator positioned at the edges
+                                          // Selection indicator - inset by the stretch controls space
                                           Positioned(
-                                            top: 0,
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
+                                            top: stretchControlsExtension,
+                                            bottom: stretchControlsExtension,
+                                            left: stretchControlsExtension,
+                                            right: stretchControlsExtension,
                                             child: Builder(
                                               builder: (context) {
                                                 if (usingHtmlRenderer) {
@@ -337,8 +362,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               .showScaleRotationControlsResolver()) ...[
                                             // Top-left corner - scale control
                                             Positioned(
-                                              top: 0,
-                                              left: 0,
+                                              top: stretchControlsExtension,
+                                              left: stretchControlsExtension,
                                               width: controlsSize,
                                               height: controlsSize,
                                               child: MouseRegion(
@@ -367,8 +392,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             ),
                                             // Bottom-left corner - scale control
                                             Positioned(
-                                              bottom: 0,
-                                              left: 0,
+                                              bottom: stretchControlsExtension,
+                                              left: stretchControlsExtension,
                                               width: controlsSize,
                                               height: controlsSize,
                                               child: MouseRegion(
@@ -397,8 +422,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             ),
                                             // Top-right corner - rotation control
                                             Positioned(
-                                              top: 0,
-                                              right: 0,
+                                              top: stretchControlsExtension,
+                                              right: stretchControlsExtension,
                                               width: controlsSize,
                                               height: controlsSize,
                                               child: MouseRegion(
@@ -428,8 +453,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             ),
                                             // Bottom-right corner - scale control
                                             Positioned(
-                                              bottom: 0,
-                                              right: 0,
+                                              bottom: stretchControlsExtension,
+                                              right: stretchControlsExtension,
                                               width: controlsSize,
                                               height: controlsSize,
                                               child: MouseRegion(
@@ -465,14 +490,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             if (stretchControlsSettings
                                                 .showVerticalControls)
                                               Positioned(
-                                                top: 0 -
-                                                    stretchControlsOffset -
-                                                    (stretchControlsSize *
-                                                        stretchControlsSettings
-                                                            .tapTargetSize /
-                                                        2),
-                                                left: objectPadding +
-                                                    (size.width / 2) -
+                                                top: 0,
+                                                left: (totalWidth / 2) -
                                                     (stretchControlsSize *
                                                         stretchControlsSettings
                                                             .tapTargetSize /
@@ -505,7 +524,7 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                                               entry,
                                                               details),
                                                       behavior: HitTestBehavior
-                                                          .translucent,
+                                                          .opaque,
                                                       child: Container(
                                                         width: stretchControlsSize *
                                                             stretchControlsSettings
@@ -513,7 +532,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                                         height: stretchControlsSize *
                                                             stretchControlsSettings
                                                                 .tapTargetSize,
-                                                        color: Colors.red,
+                                                        color:
+                                                            Colors.transparent,
                                                       ),
                                                     ),
                                                     // Visual control box (centered)
@@ -575,14 +595,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             if (stretchControlsSettings
                                                 .showVerticalControls)
                                               Positioned(
-                                                bottom: 0 -
-                                                    stretchControlsOffset -
-                                                    (stretchControlsSize *
-                                                        stretchControlsSettings
-                                                            .tapTargetSize /
-                                                        2),
-                                                left: objectPadding +
-                                                    (size.width / 2) -
+                                                bottom: 0,
+                                                left: (totalWidth / 2) -
                                                     (stretchControlsSize *
                                                         stretchControlsSettings
                                                             .tapTargetSize /
@@ -686,14 +700,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             if (stretchControlsSettings
                                                 .showHorizontalControls)
                                               Positioned(
-                                                left: 0 -
-                                                    stretchControlsOffset -
-                                                    (stretchControlsSize *
-                                                        stretchControlsSettings
-                                                            .tapTargetSize /
-                                                        2),
-                                                top: objectPadding +
-                                                    (size.height / 2) -
+                                                left: 0,
+                                                top: (totalHeight / 2) -
                                                     (stretchControlsSize *
                                                         stretchControlsSettings
                                                             .tapTargetSize /
@@ -797,14 +805,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                             if (stretchControlsSettings
                                                 .showHorizontalControls)
                                               Positioned(
-                                                right: 0 -
-                                                    stretchControlsOffset -
-                                                    (stretchControlsSize *
-                                                        stretchControlsSettings
-                                                            .tapTargetSize /
-                                                        2),
-                                                top: objectPadding +
-                                                    (size.height / 2) -
+                                                right: 0,
+                                                top: (totalHeight / 2) -
                                                     (stretchControlsSize *
                                                         stretchControlsSettings
                                                             .tapTargetSize /
@@ -908,9 +910,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                           if (entry.value
                                               is Sized2DDrawable) ...[
                                             Positioned(
-                                              top: 0,
-                                              left: (size.width / 2) +
-                                                  objectPadding -
+                                              top: stretchControlsExtension,
+                                              left: (totalWidth / 2) -
                                                   (controlsSize / 2),
                                               width: controlsSize,
                                               height: controlsSize,
@@ -940,9 +941,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                             Positioned(
-                                              bottom: 0,
-                                              left: (size.width / 2) +
-                                                  objectPadding -
+                                              bottom: stretchControlsExtension,
+                                              left: (totalWidth / 2) -
                                                   (controlsSize / 2),
                                               width: controlsSize,
                                               height: controlsSize,
@@ -972,9 +972,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                             Positioned(
-                                              left: 0,
-                                              top: (size.height / 2) +
-                                                  objectPadding -
+                                              left: stretchControlsExtension,
+                                              top: (totalHeight / 2) -
                                                   (controlsSize / 2),
                                               width: controlsSize,
                                               height: controlsSize,
@@ -1004,9 +1003,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                               ),
                                             ),
                                             Positioned(
-                                              right: 0,
-                                              top: (size.height / 2) +
-                                                  objectPadding -
+                                              right: stretchControlsExtension,
+                                              top: (totalHeight / 2) -
                                                   (controlsSize / 2),
                                               width: controlsSize,
                                               height: controlsSize,
@@ -1039,7 +1037,10 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                                         ],
                                       ),
                                     )
-                                  : widget,
+                                  : Padding(
+                                      padding: EdgeInsets.all(innerPadding),
+                                      child: widget,
+                                    ),
                               transitionBuilder: (child, animation) {
                                 return FadeTransition(
                                   opacity: animation,
