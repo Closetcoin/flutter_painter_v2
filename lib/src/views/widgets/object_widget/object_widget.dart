@@ -198,11 +198,18 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
     final drawable = entry.value;
     final selected = drawable == controller?.selectedObjectDrawable;
 
+    // Determine if padding should be applied
+    // If background was removed and the setting is enabled, use 0 padding
+    final shouldRemovePadding = drawable is ImageDrawable &&
+        drawable.backgroundRemoved &&
+        settings.backgroundRemoverSettings.removeIndicatorPaddingAfterRemoval;
+    final effectivePadding = shouldRemovePadding ? 0.0 : objectPadding;
+
     // Use ObjectLayoutCalculator to compute all layout properties
     final layout = ObjectLayoutCalculator(
       drawable: drawable,
       constraints: constraints,
-      objectPadding: objectPadding,
+      objectPadding: effectivePadding,
       transformationScale: transformationScale,
       stretchControlsSettings: stretchControlsSettings,
       isSelected: selected,
