@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'object_corner_controls.dart';
+import '../../../controllers/settings/accessibility_controls_settings.dart';
 
 /// Renders the corner controls for scaling and rotation.
 class ObjectScaleRotationControls extends StatelessWidget {
-  final double stretchControlsExtension;
+  final double indicatorInset;
   final double controlSize;
+  final double cornerOffset;
   final Map<int, bool> controlsAreActive;
   final Map<int, dynamic> initialScaleDrawables; // For rotation cursor state
   final int entryKey;
   final bool showRotationControl;
   final bool showScaleControl;
+  final ControlWidgetBuilder? rotationControlBuilder;
+  final ControlWidgetBuilder? scaleControlBuilder;
   final void Function(int controlIndex, DragStartDetails details)
       onScalePanStart;
   final void Function(int controlIndex, DragUpdateDetails details)
@@ -24,13 +28,16 @@ class ObjectScaleRotationControls extends StatelessWidget {
 
   const ObjectScaleRotationControls({
     Key? key,
-    required this.stretchControlsExtension,
+    required this.indicatorInset,
     required this.controlSize,
+    required this.cornerOffset,
     required this.controlsAreActive,
     required this.initialScaleDrawables,
     required this.entryKey,
     required this.showRotationControl,
     required this.showScaleControl,
+    this.rotationControlBuilder,
+    this.scaleControlBuilder,
     required this.onScalePanStart,
     required this.onScalePanUpdate,
     required this.onScalePanEnd,
@@ -48,12 +55,14 @@ class ObjectScaleRotationControls extends StatelessWidget {
           ObjectCornerControl(
             position: CornerPosition.topRight,
             type: CornerControlType.rotation,
-            stretchControlsExtension: stretchControlsExtension,
+            indicatorInset: indicatorInset,
             controlSize: controlSize,
+            cornerOffset: cornerOffset,
             isActive: controlsAreActive[2] ?? false,
             activeStates: initialScaleDrawables.containsKey(entryKey)
                 ? controlsAreActive
                 : null,
+            customWidgetBuilder: rotationControlBuilder,
             onPanStart: (details) => onRotationPanStart(2, details),
             onPanUpdate: (details) => onRotationPanUpdate(2, details),
             onPanEnd: (details) => onRotationPanEnd(2, details),
@@ -63,9 +72,11 @@ class ObjectScaleRotationControls extends StatelessWidget {
           ObjectCornerControl(
             position: CornerPosition.bottomRight,
             type: CornerControlType.scale,
-            stretchControlsExtension: stretchControlsExtension,
+            indicatorInset: indicatorInset,
             controlSize: controlSize,
+            cornerOffset: cornerOffset,
             isActive: controlsAreActive[3] ?? false,
+            customWidgetBuilder: scaleControlBuilder,
             onPanStart: (details) => onScalePanStart(3, details),
             onPanUpdate: (details) => onScalePanUpdate(3, details),
             onPanEnd: (details) => onScalePanEnd(3, details),

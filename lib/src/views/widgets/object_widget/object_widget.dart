@@ -51,10 +51,10 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   static Duration get controlsTransitionDuration =>
       const Duration(milliseconds: 100);
 
-  /// Getter for the size of the controls of the selected object.
+  /// Getter for the size of the corner controls.
+  /// Uses the size specified in accessibilityControls settings.
   double get controlsSize =>
-      (settings.accessibilityControls.enlargeControls ? 20 : 10) /
-      transformationScale;
+      settings.accessibilityControls.controlSize / transformationScale;
 
   /// Getter for the stretch controls settings.
   StretchControlsSettings get stretchControlsSettings =>
@@ -206,6 +206,11 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       transformationScale: transformationScale,
       stretchControlsSettings: stretchControlsSettings,
       isSelected: selected,
+      cornerControlsSize: controlsSize,
+      cornerControlsOffset:
+          settings.accessibilityControls.cornerOffset / transformationScale,
+      showCornerControls: settings.accessibilityControls.showRotationControl ||
+          settings.accessibilityControls.showScaleControl,
     );
 
     final contentWidget = SizedBox(

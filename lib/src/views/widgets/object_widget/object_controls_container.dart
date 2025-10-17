@@ -85,12 +85,13 @@ class ObjectControlsContainer extends StatelessWidget {
             child: contentWidget,
           ),
 
-          // Selection indicator - inset by the stretch controls space
+          // Selection indicator - inset by the max controls extension
+          // This keeps the indicator aligned with the image
           Positioned(
-            top: layout.stretchControlsExtension,
-            bottom: layout.stretchControlsExtension,
-            left: layout.stretchControlsExtension,
-            right: layout.stretchControlsExtension,
+            top: layout.maxControlsExtension,
+            bottom: layout.maxControlsExtension,
+            left: layout.maxControlsExtension,
+            right: layout.maxControlsExtension,
             child: ObjectSelectionIndicator(
               settings: settings.selectionIndicatorSettings,
               transformationScale: transformationScale,
@@ -98,15 +99,22 @@ class ObjectControlsContainer extends StatelessWidget {
           ),
 
           // Scale and rotation corner controls
+          // Positioned at indicator corners + diagonal offset
           if (showRotationControl || showScaleControl)
             ObjectScaleRotationControls(
-              stretchControlsExtension: layout.stretchControlsExtension,
+              indicatorInset: layout.maxControlsExtension,
               controlSize: controlsSize,
+              cornerOffset: settings.accessibilityControls.cornerOffset /
+                  transformationScale,
               controlsAreActive: controlsAreActive,
               initialScaleDrawables: initialScaleDrawables,
               entryKey: entryKey,
               showRotationControl: showRotationControl,
               showScaleControl: showScaleControl,
+              rotationControlBuilder:
+                  settings.accessibilityControls.rotationControlBuilder,
+              scaleControlBuilder:
+                  settings.accessibilityControls.scaleControlBuilder,
               onScalePanStart: onScaleControlPanStart,
               onScalePanUpdate: onScaleControlPanUpdate,
               onScalePanEnd: onScaleControlPanEnd,
@@ -116,28 +124,40 @@ class ObjectControlsContainer extends StatelessWidget {
             ),
 
           // Image stretch controls (only for ImageDrawable)
+          // Positioned at indicator edges
           if (layout.shouldRenderStretchControls &&
               onImageStretchControlPanStart != null &&
               onImageStretchControlPanUpdate != null &&
               onImageStretchControlPanEnd != null)
-            ObjectStretchControls(
-              totalWidth: layout.totalWidth,
-              totalHeight: layout.totalHeight,
-              stretchControlsSize: layout.stretchControlsSize,
-              settings: settings.stretchControlsSettings,
-              controlsAreActive: controlsAreActive,
-              onPanStart: onImageStretchControlPanStart!,
-              onPanUpdate: onImageStretchControlPanUpdate!,
-              onPanEnd: onImageStretchControlPanEnd!,
+            Padding(
+              padding: EdgeInsets.all(layout.maxControlsExtension -
+                  layout.stretchControlsExtension),
+              child: ObjectStretchControls(
+                totalWidth: layout.totalWidth -
+                    ((layout.maxControlsExtension -
+                            layout.stretchControlsExtension) *
+                        2),
+                totalHeight: layout.totalHeight -
+                    ((layout.maxControlsExtension -
+                            layout.stretchControlsExtension) *
+                        2),
+                stretchControlsSize: layout.stretchControlsSize,
+                settings: settings.stretchControlsSettings,
+                controlsAreActive: controlsAreActive,
+                onPanStart: onImageStretchControlPanStart!,
+                onPanUpdate: onImageStretchControlPanUpdate!,
+                onPanEnd: onImageStretchControlPanEnd!,
+              ),
             ),
 
           // Resize controls (only for Sized2DDrawable)
+          // Positioned at indicator edges
           if (drawable is Sized2DDrawable &&
               onResizeControlPanStart != null &&
               onResizeControlPanUpdate != null &&
               onResizeControlPanEnd != null)
             ObjectResizeControls(
-              stretchControlsExtension: layout.stretchControlsExtension,
+              indicatorInset: layout.maxControlsExtension,
               totalWidth: layout.totalWidth,
               totalHeight: layout.totalHeight,
               controlSize: controlsSize,

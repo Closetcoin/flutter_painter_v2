@@ -3,7 +3,7 @@ import 'object_control_box.dart';
 
 /// Renders the 4 edge controls for resizing Sized2DDrawables.
 class ObjectResizeControls extends StatelessWidget {
-  final double stretchControlsExtension;
+  final double indicatorInset;
   final double totalWidth;
   final double totalHeight;
   final double controlSize;
@@ -14,7 +14,7 @@ class ObjectResizeControls extends StatelessWidget {
 
   const ObjectResizeControls({
     Key? key,
-    required this.stretchControlsExtension,
+    required this.indicatorInset,
     required this.totalWidth,
     required this.totalHeight,
     required this.controlSize,
@@ -30,7 +30,7 @@ class ObjectResizeControls extends StatelessWidget {
       children: [
         // Top edge - vertical resize (control index 4)
         Positioned(
-          top: stretchControlsExtension,
+          top: indicatorInset,
           left: (totalWidth / 2) - (controlSize / 2),
           width: controlSize,
           height: controlSize,
@@ -48,7 +48,7 @@ class ObjectResizeControls extends StatelessWidget {
         ),
         // Bottom edge - vertical resize (control index 5)
         Positioned(
-          bottom: stretchControlsExtension,
+          bottom: indicatorInset,
           left: (totalWidth / 2) - (controlSize / 2),
           width: controlSize,
           height: controlSize,
@@ -66,7 +66,7 @@ class ObjectResizeControls extends StatelessWidget {
         ),
         // Left edge - horizontal resize (control index 6)
         Positioned(
-          left: stretchControlsExtension,
+          left: indicatorInset,
           top: (totalHeight / 2) - (controlSize / 2),
           width: controlSize,
           height: controlSize,
@@ -84,7 +84,7 @@ class ObjectResizeControls extends StatelessWidget {
         ),
         // Right edge - horizontal resize (control index 7)
         Positioned(
-          right: stretchControlsExtension,
+          right: indicatorInset,
           top: (totalHeight / 2) - (controlSize / 2),
           width: controlSize,
           height: controlSize,

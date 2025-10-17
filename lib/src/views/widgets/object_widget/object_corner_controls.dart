@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'object_control_box.dart';
+import '../../../controllers/settings/accessibility_controls_settings.dart';
 
 /// Position of a corner control
 enum CornerPosition { topLeft, bottomLeft, topRight, bottomRight }
@@ -11,10 +12,12 @@ enum CornerControlType { scale, rotation }
 class ObjectCornerControl extends StatelessWidget {
   final CornerPosition position;
   final CornerControlType type;
-  final double stretchControlsExtension;
+  final double indicatorInset;
   final double controlSize;
+  final double cornerOffset;
   final bool isActive;
   final Map<int, bool>? activeStates; // For checking if dragging
+  final ControlWidgetBuilder? customWidgetBuilder;
   final void Function(DragStartDetails) onPanStart;
   final void Function(DragUpdateDetails) onPanUpdate;
   final void Function(DragEndDetails) onPanEnd;
@@ -23,10 +26,12 @@ class ObjectCornerControl extends StatelessWidget {
     Key? key,
     required this.position,
     required this.type,
-    required this.stretchControlsExtension,
+    required this.indicatorInset,
     required this.controlSize,
+    required this.cornerOffset,
     required this.isActive,
     this.activeStates,
+    this.customWidgetBuilder,
     required this.onPanStart,
     required this.onPanUpdate,
     required this.onPanEnd,
@@ -35,7 +40,8 @@ class ObjectCornerControl extends StatelessWidget {
   double? get top {
     if (position == CornerPosition.topLeft ||
         position == CornerPosition.topRight) {
-      return 0.0; // Position at the outer edge of the container
+      // Position at indicator edge, then move up diagonally by cornerOffset
+      return indicatorInset - cornerOffset;
     }
     return null;
   }
@@ -43,7 +49,8 @@ class ObjectCornerControl extends StatelessWidget {
   double? get bottom {
     if (position == CornerPosition.bottomLeft ||
         position == CornerPosition.bottomRight) {
-      return 0.0; // Position at the outer edge of the container
+      // Position at indicator edge, then move down diagonally by cornerOffset
+      return indicatorInset - cornerOffset;
     }
     return null;
   }
@@ -51,7 +58,8 @@ class ObjectCornerControl extends StatelessWidget {
   double? get left {
     if (position == CornerPosition.topLeft ||
         position == CornerPosition.bottomLeft) {
-      return 0.0; // Position at the outer edge of the container
+      // Position at indicator edge, then move left diagonally by cornerOffset
+      return indicatorInset - cornerOffset;
     }
     return null;
   }
@@ -59,7 +67,8 @@ class ObjectCornerControl extends StatelessWidget {
   double? get right {
     if (position == CornerPosition.topRight ||
         position == CornerPosition.bottomRight) {
-      return 0.0; // Position at the outer edge of the container
+      // Position at indicator edge, then move right diagonally by cornerOffset
+      return indicatorInset - cornerOffset;
     }
     return null;
   }
@@ -84,8 +93,15 @@ class ObjectCornerControl extends StatelessWidget {
     }
   }
 
-  BoxShape get shape =>
-      type == CornerControlType.rotation ? BoxShape.circle : BoxShape.rectangle;
+  /// Icon to display based on control type
+  IconData get icon {
+    switch (type) {
+      case CornerControlType.rotation:
+        return Icons.rotate_right;
+      case CornerControlType.scale:
+        return Icons.open_in_full;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,10 +118,15 @@ class ObjectCornerControl extends StatelessWidget {
           onPanStart: onPanStart,
           onPanUpdate: onPanUpdate,
           onPanEnd: onPanEnd,
-          child: ObjectControlBox(
-            shape: shape,
-            active: isActive,
-          ),
+          child: customWidgetBuilder != null
+              ? customWidgetBuilder!(isActive) // Use custom widget if provided
+              : ObjectControlBox(
+                  // Default widget: circular with icon
+                  shape: BoxShape.circle,
+                  active: isActive,
+                  icon: icon,
+                  iconSize: controlSize * 0.6, // Icon is 60% of control size
+                ),
         ),
       ),
     );

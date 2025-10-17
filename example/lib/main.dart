@@ -6,6 +6,7 @@ import 'package:example/app_image_picker_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_painter_v2/flutter_painter.dart';
+import 'package:flutter_painter_v2/src/views/widgets/object_widget/object_control_box.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
@@ -423,9 +424,24 @@ PainterController _usePainterController() => useRef(
             autoSelectAfterAdd: true,
             singleObjectMode: true,
             accessibilityControls: AccessibilityControlsSettings(
-              enlargeControls: false,
               showRotationControl: true,
               showScaleControl: true,
+              controlSize: 20.0,
+              cornerOffset: 24.0,
+              rotationControlBuilder: (isActive) => ObjectControlBox(
+                shape: BoxShape.circle,
+                active: isActive,
+                icon: Icons.refresh,
+                iconSize: 18,
+                borderWidth: 0,
+              ),
+              scaleControlBuilder: (isActive) => ObjectControlBox(
+                shape: BoxShape.circle,
+                active: isActive,
+                icon: Icons.zoom_out_map,
+                iconSize: 18,
+                borderWidth: 0,
+              ),
             ),
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,

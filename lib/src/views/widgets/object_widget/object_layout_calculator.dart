@@ -12,6 +12,9 @@ class ObjectLayoutCalculator {
   final double transformationScale;
   final StretchControlsSettings stretchControlsSettings;
   final bool isSelected;
+  final double cornerControlsSize;
+  final double cornerControlsOffset;
+  final bool showCornerControls;
 
   ObjectLayoutCalculator({
     required this.drawable,
@@ -20,6 +23,9 @@ class ObjectLayoutCalculator {
     required this.transformationScale,
     required this.stretchControlsSettings,
     required this.isSelected,
+    required this.cornerControlsSize,
+    required this.cornerControlsOffset,
+    required this.showCornerControls,
   });
 
   /// The size of the drawable content
@@ -47,16 +53,31 @@ class ObjectLayoutCalculator {
           (stretchControlsSize * stretchControlsSettings.tapTargetSize / 2)
       : 0.0;
 
-  /// The inner padding (objectPadding + stretch controls space)
-  double get innerPadding => objectPadding + stretchControlsExtension;
+  /// Extra space needed for corner controls (rotation/scale)
+  /// This accounts for the control size and diagonal offset
+  double get cornerControlsExtension => (isSelected && showCornerControls)
+      ? cornerControlsOffset + (cornerControlsSize / 2)
+      : 0.0;
 
-  /// Total width including all padding and controls
+  /// The maximum extension needed (either from stretch or corner controls)
+  double get maxControlsExtension =>
+      stretchControlsExtension > cornerControlsExtension
+          ? stretchControlsExtension
+          : cornerControlsExtension;
+
+  /// The inner padding uses the max extension
+  /// Content is positioned to leave room for whichever control needs more space
+  double get innerPadding => maxControlsExtension + objectPadding;
+
+  /// Total width including all padding and max controls extension
+  /// Uses the max of stretch or corner controls, not the sum
   double get totalWidth =>
-      contentSize.width + (objectPadding * 2) + (stretchControlsExtension * 2);
+      contentSize.width + (objectPadding * 2) + (maxControlsExtension * 2);
 
-  /// Total height including all padding and controls
+  /// Total height including all padding and max controls extension
+  /// Uses the max of stretch or corner controls, not the sum
   double get totalHeight =>
-      contentSize.height + (objectPadding * 2) + (stretchControlsExtension * 2);
+      contentSize.height + (objectPadding * 2) + (maxControlsExtension * 2);
 
   /// Top-left position for the entire container
   Offset get containerTopLeft => Offset(

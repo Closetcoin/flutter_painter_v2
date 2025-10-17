@@ -9,6 +9,12 @@ class ObjectControlBox extends StatelessWidget {
   /// Whether the box is being used or not.
   final bool active;
 
+  /// Optional icon to display in the center of the control.
+  final IconData? icon;
+
+  /// Size of the icon if provided.
+  final double? iconSize;
+
   /// Color of control when it is not active.
   /// Defaults to [Colors.white].
   final Color inactiveColor;
@@ -22,7 +28,7 @@ class ObjectControlBox extends StatelessWidget {
   final Color shadowColor;
 
   /// The blur radius of the shadow.
-  /// Defaults to `2.0`.
+  /// Defaults to `1.0` (reduced from 2.0 for less intensity).
   final double shadowBlurRadius;
 
   /// The color of the control box border.
@@ -43,10 +49,12 @@ class ObjectControlBox extends StatelessWidget {
     Key? key,
     this.shape = BoxShape.rectangle,
     this.active = false,
+    this.icon,
+    this.iconSize,
     this.inactiveColor = Colors.white,
     this.activeColor,
     this.shadowColor = Colors.black,
-    this.shadowBlurRadius = 2.0,
+    this.shadowBlurRadius = 1.0,
     this.borderColor = Colors.grey,
     this.borderWidth = 1.0,
   }) : super(key: key);
@@ -57,22 +65,34 @@ class ObjectControlBox extends StatelessWidget {
     if (theme == ThemeData.fallback()) theme = null;
     final activeColor =
         this.activeColor ?? theme?.colorScheme.secondary ?? Colors.blue;
-    return AnimatedContainer(
-      duration: transitionDuration,
-      decoration: BoxDecoration(
-        color: active ? activeColor : inactiveColor,
-        shape: shape,
-        border: Border.all(
-          color: borderColor,
-          width: borderWidth,
+
+    return SizedBox.expand(
+      child: AnimatedContainer(
+        duration: transitionDuration,
+        decoration: BoxDecoration(
+          color: active ? activeColor : inactiveColor,
+          shape: shape,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
+          boxShadow: shadowBlurRadius > 0
+              ? [
+                  BoxShadow(
+                    color: shadowColor,
+                    blurRadius: shadowBlurRadius,
+                  )
+                ]
+              : null,
         ),
-        boxShadow: shadowBlurRadius > 0
-            ? [
-                BoxShadow(
-                  color: shadowColor,
-                  blurRadius: shadowBlurRadius,
-                )
-              ]
+        child: icon != null
+            ? Center(
+                child: Icon(
+                  icon,
+                  size: iconSize,
+                  color: active ? inactiveColor : borderColor,
+                ),
+              )
             : null,
       ),
     );

@@ -365,7 +365,7 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   }
 
   /// Calculates the maximum available size for image content, accounting for
-  /// the selection indicator, stretch controls, and tap target areas.
+  /// the selection indicator, stretch controls, corner controls, and tap target areas.
   ///
   /// This is useful when adding an image and you want it to fit within the
   /// visible canvas without being cropped by UI elements.
@@ -377,6 +377,7 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   Size getMaxContentSize(Size canvasSize, {double transformationScale = 1.0}) {
     final objectSettings = value.settings.object;
     final stretchControlsSettings = objectSettings.stretchControlsSettings;
+    final accessibilityControlsSettings = objectSettings.accessibilityControls;
 
     // Calculate object padding (selection indicator padding)
     final objectPadding =
@@ -398,8 +399,32 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
             (stretchControlsSize * stretchControlsSettings.tapTargetSize / 2)
         : 0.0;
 
-    // Total padding on each side = objectPadding + stretchControlsExtension
-    final totalPaddingPerSide = objectPadding + stretchControlsExtension;
+    // Calculate corner controls (rotation/scale) size
+    final cornerControlsSize =
+        accessibilityControlsSettings.controlSize / transformationScale;
+
+    // Calculate corner controls offset
+    final cornerControlsOffset =
+        accessibilityControlsSettings.cornerOffset / transformationScale;
+
+    // Calculate the extension needed for corner controls
+    // This applies when rotation or scale controls are enabled
+    final showCornerControls =
+        accessibilityControlsSettings.showRotationControl ||
+            accessibilityControlsSettings.showScaleControl;
+    final cornerControlsExtension = showCornerControls
+        ? cornerControlsOffset + (cornerControlsSize / 2)
+        : 0.0;
+
+    // Use the max of stretch or corner controls extension (not sum)
+    // since they overlap at the corners
+    final maxControlsExtension =
+        stretchControlsExtension > cornerControlsExtension
+            ? stretchControlsExtension
+            : cornerControlsExtension;
+
+    // Total padding on each side = objectPadding + maxControlsExtension
+    final totalPaddingPerSide = objectPadding + maxControlsExtension;
 
     // Available content size = canvas size - (padding on both sides)
     final availableWidth = canvasSize.width - (totalPaddingPerSide * 2);
