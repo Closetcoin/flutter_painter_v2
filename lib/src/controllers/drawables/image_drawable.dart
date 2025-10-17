@@ -110,6 +110,93 @@ class ImageDrawable extends ObjectDrawable {
     );
   }
 
+  /// Draws the image with proper support for independent scaleX/scaleY.
+  /// Overrides the parent draw method to handle eraseMask with non-uniform scaling.
+  @override
+  void draw(Canvas canvas, Size size) {
+    if (hidden) return;
+
+    canvas.save();
+
+    // Draw assist lines first (these are not affected by rotation)
+    drawAssists(canvas, size);
+
+    // Translate to object position, then rotate
+    canvas.translate(position.dx, position.dy);
+    canvas.rotate(rotationAngle);
+    canvas.translate(-position.dx, -position.dy);
+
+    // If there are erase masks, apply them using saveLayer
+    if (eraseMask.isNotEmpty) {
+      // Save a new layer for applying the erase mask
+      canvas.saveLayer(null, Paint());
+
+      // Draw the object
+      drawObject(canvas, size);
+
+      // Apply erase masks by drawing paths with BlendMode.clear
+      // For ImageDrawable, we need to use scaleX and scaleY instead of uniform scale
+      final erasePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..blendMode = BlendMode.clear
+        ..strokeWidth = 10 *
+            ((scaleX + scaleY) /
+                2); // Use average of scaleX and scaleY for stroke width
+
+      // Check if this drawable is horizontally flipped
+      final isFlipped = isFlippedHorizontally;
+
+      // Apply the same flip transformation as the object if needed
+      if (isFlipped) {
+        canvas.save();
+        canvas.scale(-1, 1);
+      }
+
+      // The erase paths are stored in object-local coordinates (unscaled, unrotated, unflipped)
+      // We need to transform them to canvas coordinates using scaleX and scaleY
+      for (final localErasePath in eraseMask) {
+        if (localErasePath.length < 2) continue;
+
+        final canvasPath = Path();
+        bool firstPoint = true;
+
+        for (final localPoint in localErasePath) {
+          // Transform local point to canvas coordinates
+          // Apply scaleX and scaleY for proper stretching support
+          final flippedPosition = isFlipped ? position.scale(-1, 1) : position;
+
+          final scaledPoint = Offset(
+            flippedPosition.dx + localPoint.dx * scaleX,
+            flippedPosition.dy + localPoint.dy * scaleY,
+          );
+
+          if (firstPoint) {
+            canvasPath.moveTo(scaledPoint.dx, scaledPoint.dy);
+            firstPoint = false;
+          } else {
+            canvasPath.lineTo(scaledPoint.dx, scaledPoint.dy);
+          }
+        }
+
+        canvas.drawPath(canvasPath, erasePaint);
+      }
+
+      if (isFlipped) {
+        canvas.restore();
+      }
+
+      // Restore the layer
+      canvas.restore();
+    } else {
+      // No erase mask, just draw the object normally
+      drawObject(canvas, size);
+    }
+
+    canvas.restore();
+  }
+
   /// Draws the image on the provided [canvas] of size [size].
   @override
   void drawObject(Canvas canvas, Size size) {
