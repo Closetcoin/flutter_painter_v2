@@ -39,7 +39,7 @@ class AccessibilityControlsSettings {
   /// For example, an offset of 10.0 will move the control 10px right and 10px down
   /// from the bottom-right corner (or appropriate direction for other corners).
   ///
-  /// Defaults to 0.0 (controls positioned at the corner).
+  /// Defaults to 24.0 (controls positioned away from the corner for better visibility).
   final double cornerOffset;
 
   /// Optional custom widget builder for the rotation control.
@@ -60,7 +60,7 @@ class AccessibilityControlsSettings {
     this.showRotationControl = true,
     this.showScaleControl = true,
     this.controlSize = 20.0,
-    this.cornerOffset = 0.0,
+    this.cornerOffset = 24.0,
     this.rotationControlBuilder,
     this.scaleControlBuilder,
   });

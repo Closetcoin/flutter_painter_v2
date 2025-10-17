@@ -97,9 +97,9 @@ class ObjectCornerControl extends StatelessWidget {
   IconData get icon {
     switch (type) {
       case CornerControlType.rotation:
-        return Icons.rotate_right;
+        return Icons.refresh;
       case CornerControlType.scale:
-        return Icons.open_in_full;
+        return Icons.zoom_out_map;
     }
   }
 
@@ -125,7 +125,8 @@ class ObjectCornerControl extends StatelessWidget {
                   shape: BoxShape.circle,
                   active: isActive,
                   icon: icon,
-                  iconSize: controlSize * 0.6, // Icon is 60% of control size
+                  iconSize: controlSize *
+                      0.9, // Icon is 90% of control size (matches 18px icon with 20px control)
                 ),
         ),
       ),

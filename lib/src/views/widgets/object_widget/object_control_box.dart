@@ -15,6 +15,10 @@ class ObjectControlBox extends StatelessWidget {
   /// Size of the icon if provided.
   final double? iconSize;
 
+  /// Color of the icon.
+  /// Defaults to [Colors.black].
+  final Color iconColor;
+
   /// Color of control when it is not active.
   /// Defaults to [Colors.white].
   final Color inactiveColor;
@@ -36,7 +40,7 @@ class ObjectControlBox extends StatelessWidget {
   final Color borderColor;
 
   /// The thickness of the control box border.
-  /// Defaults to `1.0`.
+  /// Defaults to `0.0`.
   final double borderWidth;
 
   /// Duration for the transition animation
@@ -51,12 +55,13 @@ class ObjectControlBox extends StatelessWidget {
     this.active = false,
     this.icon,
     this.iconSize,
+    this.iconColor = Colors.black,
     this.inactiveColor = Colors.white,
     this.activeColor,
     this.shadowColor = Colors.black,
     this.shadowBlurRadius = 1.0,
     this.borderColor = Colors.grey,
-    this.borderWidth = 1.0,
+    this.borderWidth = 0.0,
   }) : super(key: key);
 
   @override
@@ -72,10 +77,12 @@ class ObjectControlBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: active ? activeColor : inactiveColor,
           shape: shape,
-          border: Border.all(
-            color: borderColor,
-            width: borderWidth,
-          ),
+          border: borderWidth > 0
+              ? Border.all(
+                  color: borderColor,
+                  width: borderWidth,
+                )
+              : null,
           boxShadow: shadowBlurRadius > 0
               ? [
                   BoxShadow(
@@ -90,7 +97,7 @@ class ObjectControlBox extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: iconSize,
-                  color: active ? inactiveColor : borderColor,
+                  color: iconColor,
                 ),
               )
             : null,
