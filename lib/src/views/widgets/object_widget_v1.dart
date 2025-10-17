@@ -1,7 +1,7 @@
 part of 'flutter_painter.dart';
 
 /// Flutter widget to move, scale and rotate [ObjectDrawable]s.
-class _ObjectWidget extends StatefulWidget {
+class _ObjectWidgetV1 extends StatefulWidget {
   /// Child widget.
   final Widget child;
 
@@ -11,17 +11,17 @@ class _ObjectWidget extends StatefulWidget {
   final bool interactionEnabled;
 
   /// Creates a [_ObjectWidget] with the given [controller], [child] widget.
-  const _ObjectWidget({
+  const _ObjectWidgetV1({
     Key? key,
     required this.child,
     this.interactionEnabled = true,
   }) : super(key: key);
 
   @override
-  _ObjectWidgetState createState() => _ObjectWidgetState();
+  _ObjectWidgetV1State createState() => _ObjectWidgetV1State();
 }
 
-class _ObjectWidgetState extends State<_ObjectWidget> {
+class _ObjectWidgetV1State extends State<_ObjectWidgetV1> {
   static Set<double> assistAngles = <double>{
     0,
     pi / 4,

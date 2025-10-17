@@ -16,18 +16,21 @@ import '../../controllers/events/events.dart';
 import '../../controllers/drawables/text_drawable.dart';
 import '../../controllers/drawables/path/path_drawables.dart';
 import '../../controllers/settings/settings.dart';
-import '../../controllers/settings/stretch_controls_settings.dart';
 import '../painters/painter.dart';
 import '../../controllers/painter_controller.dart';
 import '../../controllers/helpers/border_box_shadow.dart';
 import '../../extensions/painter_controller_helper_extension.dart';
 import 'painter_controller_widget.dart';
 import 'dart:math' as math;
+// Extracted object widget components
+import 'object_layout_calculator.dart';
+import 'object_controls_container.dart';
 
 part 'free_style_widget.dart';
 part 'text_widget.dart';
-part 'object_widget.dart';
+part 'object_widget_v2.dart';
 part 'shape_widget.dart';
+part 'object_widget.dart';
 
 typedef DrawableCreatedCallback = Function(Drawable drawable);
 
