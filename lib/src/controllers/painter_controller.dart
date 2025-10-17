@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'events/selected_object_drawable_removed_event.dart';
 import '../views/widgets/painter_controller_widget.dart';
 import 'actions/actions.dart';
-import 'background_remover/image_background_remover_provider.dart';
+import 'background_remover/background_remover_util.dart';
 import 'drawables/image_drawable.dart';
 import 'events/events.dart';
 import 'drawables/background/background_drawable.dart';

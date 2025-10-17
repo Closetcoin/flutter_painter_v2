@@ -20,7 +20,8 @@ class ObjectControlsContainer extends StatelessWidget {
   final Map<int, bool> controlsAreActive;
   final Map<int, dynamic> initialScaleDrawables;
   final int entryKey;
-  final bool showScaleRotationControls;
+  final bool showRotationControl;
+  final bool showScaleControl;
 
   // Callbacks for scale controls
   final void Function(int, DragStartDetails) onScaleControlPanStart;
@@ -53,7 +54,8 @@ class ObjectControlsContainer extends StatelessWidget {
     required this.controlsAreActive,
     required this.initialScaleDrawables,
     required this.entryKey,
-    required this.showScaleRotationControls,
+    required this.showRotationControl,
+    required this.showScaleControl,
     required this.onScaleControlPanStart,
     required this.onScaleControlPanUpdate,
     required this.onScaleControlPanEnd,
@@ -96,13 +98,15 @@ class ObjectControlsContainer extends StatelessWidget {
           ),
 
           // Scale and rotation corner controls
-          if (showScaleRotationControls)
+          if (showRotationControl || showScaleControl)
             ObjectScaleRotationControls(
               stretchControlsExtension: layout.stretchControlsExtension,
               controlSize: controlsSize,
               controlsAreActive: controlsAreActive,
               initialScaleDrawables: initialScaleDrawables,
               entryKey: entryKey,
+              showRotationControl: showRotationControl,
+              showScaleControl: showScaleControl,
               onScalePanStart: onScaleControlPanStart,
               onScalePanUpdate: onScaleControlPanUpdate,
               onScalePanEnd: onScaleControlPanEnd,

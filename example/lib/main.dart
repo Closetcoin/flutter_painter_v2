@@ -422,8 +422,11 @@ PainterController _usePainterController() => useRef(
           object: ObjectSettings(
             autoSelectAfterAdd: true,
             singleObjectMode: true,
-            showScaleRotationControlsResolver: () =>
-                true, // Enable corner controls
+            accessibilityControls: AccessibilityControlsSettings(
+              enlargeControls: false,
+              showRotationControl: true,
+              showScaleControl: true,
+            ),
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,
               tapTargetSize: 4,

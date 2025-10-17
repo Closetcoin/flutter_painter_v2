@@ -53,7 +53,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
 
   /// Getter for the size of the controls of the selected object.
   double get controlsSize =>
-      (settings.enlargeControlsResolver() ? 20 : 10) / transformationScale;
+      (settings.accessibilityControls.enlargeControls ? 20 : 10) /
+      transformationScale;
 
   /// Getter for the stretch controls settings.
   StretchControlsSettings get stretchControlsSettings =>
@@ -277,8 +278,10 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                   controlsAreActive: controlsAreActive,
                   initialScaleDrawables: initialScaleDrawables,
                   entryKey: entry.key,
-                  showScaleRotationControls:
-                      settings.showScaleRotationControlsResolver(),
+                  showRotationControl:
+                      settings.accessibilityControls.showRotationControl,
+                  showScaleControl:
+                      settings.accessibilityControls.showScaleControl,
                   // Scale control callbacks
                   onScaleControlPanStart: (index, details) =>
                       onScaleControlPanStart(index, entry, details),
@@ -877,11 +880,11 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   /// A callback that is called when a transformation occurs in the [InteractiveViewer] in the widget tree.
   void onTransformUpdated() {
     setState(() {
-      final _m4storage =
+      final m4storage =
           PainterController.of(context).transformationController.value;
-      transformationScale = math.sqrt(_m4storage[8] * _m4storage[8] +
-          _m4storage[9] * _m4storage[9] +
-          _m4storage[10] * _m4storage[10]);
+      transformationScale = math.sqrt(m4storage[8] * m4storage[8] +
+          m4storage[9] * m4storage[9] +
+          m4storage[10] * m4storage[10]);
     });
   }
 

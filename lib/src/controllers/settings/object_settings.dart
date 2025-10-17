@@ -2,50 +2,24 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
-import '../drawables/sized2ddrawable.dart';
 import 'haptic_feedback_settings.dart';
 import 'background_remover_settings.dart';
 import 'smart_cropping_settings.dart';
 import 'stretch_controls_settings.dart';
 import 'selection_indicator_settings.dart';
+import 'accessibility_controls_settings.dart';
 
-typedef ObjectEnlargeControlsResolver = bool Function();
-typedef ObjectShowScaleRotationControlsResolver = bool Function();
+// Removed unnecessary function typedef - now using simple bool
 
 /// Represents settings used to control object drawables in the UI
 @immutable
 class ObjectSettings {
-  /// Target platforms of mobile operating systems.
-  ///
-  /// This is used to detect the operating system for Flutter Web applications.
-  static const Set<TargetPlatform> _mobileTargetPlatforms = {
-    TargetPlatform.android,
-    TargetPlatform.fuchsia,
-    TargetPlatform.iOS
-  };
-
   /// The layout-assist settings of the current object.
   final ObjectLayoutAssistSettings layoutAssist;
 
-  /// A function used to decide whether to enlarge the object controls or not.
-  /// This is because on touch screens, larger controls are needed to make them easier to tap and drag.
-  ///
-  /// By default, it enlarges controls on mobile operating systems (see [_enlargeControls]).
-  ///
-  /// If you need more custom control, you can for example use the cursor state from a [MouseRegion]
-  /// to determine if the user is using a mouse or not (for example, if someone is using an iPad with a mouse and keyboard).
-  final ObjectEnlargeControlsResolver enlargeControlsResolver;
-
-  /// A function used to decide whether to show scale and rotation controls or not.
-  /// This is because on touch screens, scale and rotation can be controlled with pinching.
-  /// (However, controlling the size for [Sized2DDrawable]s still needs the controls).
-  ///
-  /// By default, it hides scale and rotation controls on mobile operating systems (see [_showScaleRotationControls]).
-  ///
-  /// If you need more custom control, you can for example use the cursor state from a [MouseRegion]
-  /// to determine if the user is using a mouse or not (for example, if someone is using an iPad with a mouse and keyboard).
-  final ObjectShowScaleRotationControlsResolver
-      showScaleRotationControlsResolver;
+  /// Accessibility settings for object controls.
+  /// Controls the size and visibility of corner controls for better touch/mouse support.
+  final AccessibilityControlsSettings accessibilityControls;
 
   /// Whether to automatically select an object drawable after it is added.
   ///
@@ -80,8 +54,7 @@ class ObjectSettings {
   /// Creates a [ObjectSettings] with the given values.
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
-    this.enlargeControlsResolver = _enlargeControls,
-    this.showScaleRotationControlsResolver = _showScaleRotationControls,
+    this.accessibilityControls = const AccessibilityControlsSettings(),
     this.autoSelectAfterAdd = false,
     this.singleObjectMode = false,
     this.backgroundRemoverSettings = const BackgroundRemoverSettings(),
@@ -93,8 +66,7 @@ class ObjectSettings {
   /// Creates a copy of this but with the given fields replaced with the new values.
   ObjectSettings copyWith({
     ObjectLayoutAssistSettings? layoutAssist,
-    ObjectEnlargeControlsResolver? enlargeControlsResolver,
-    ObjectShowScaleRotationControlsResolver? showScaleRotationControlsResolver,
+    AccessibilityControlsSettings? accessibilityControls,
     bool? autoSelectAfterAdd,
     bool? singleObjectMode,
     BackgroundRemoverSettings? backgroundRemoverSettings,
@@ -104,10 +76,8 @@ class ObjectSettings {
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
-      enlargeControlsResolver:
-          enlargeControlsResolver ?? this.enlargeControlsResolver,
-      showScaleRotationControlsResolver: showScaleRotationControlsResolver ??
-          this.showScaleRotationControlsResolver,
+      accessibilityControls:
+          accessibilityControls ?? this.accessibilityControls,
       autoSelectAfterAdd: autoSelectAfterAdd ?? this.autoSelectAfterAdd,
       singleObjectMode: singleObjectMode ?? this.singleObjectMode,
       backgroundRemoverSettings:
@@ -119,17 +89,6 @@ class ObjectSettings {
       selectionIndicatorSettings:
           selectionIndicatorSettings ?? this.selectionIndicatorSettings,
     );
-  }
-
-  /// Default value for [enlargeControlsResolver].
-  ///
-  /// Returns `true` on mobile devices.
-  static bool _enlargeControls() {
-    return _mobileTargetPlatforms.contains(defaultTargetPlatform);
-  }
-
-  static bool _showScaleRotationControls() {
-    return !_mobileTargetPlatforms.contains(defaultTargetPlatform);
   }
 }
 

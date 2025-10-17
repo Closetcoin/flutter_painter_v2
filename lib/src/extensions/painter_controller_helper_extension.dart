@@ -109,18 +109,13 @@ extension PainterControllerHelper on PainterController {
         scale: scaleSettings,
       ));
 
-  /// The function used to decide whether to enlarge the object controls or not from `value.settings.object` directly.
-  ObjectEnlargeControlsResolver get enlargeObjectControlsResolver =>
-      value.settings.object.enlargeControlsResolver;
+  /// Accessibility settings for object controls from `value.settings.object` directly.
+  AccessibilityControlsSettings get objectAccessibilityControls =>
+      value.settings.object.accessibilityControls;
 
   /// The layout-assist settings of the selected object drawable from `value.settings.object` directly.
   ObjectLayoutAssistSettings get objectLayoutAssist =>
       value.settings.object.layoutAssist;
-
-  /// The function used to decide whether to show scale and rotation object controls or not from `value.settings.object` directly.
-  ObjectShowScaleRotationControlsResolver
-      get showObjectScaleRotationControlsResolver =>
-          value.settings.object.showScaleRotationControlsResolver;
 
   /// The text style to be used for text drawables from `value.settings.text` directly.
   TextStyle get textStyle => value.settings.text.textStyle;
@@ -161,12 +156,12 @@ extension PainterControllerHelper on PainterController {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
-  set enlargeObjectControlsResolver(
-          ObjectEnlargeControlsResolver enlargeControls) =>
+  set objectAccessibilityControls(
+          AccessibilityControlsSettings accessibilityControls) =>
       value = value.copyWith(
           settings: value.settings.copyWith(
               object: value.settings.object.copyWith(
-        enlargeControlsResolver: enlargeControls,
+        accessibilityControls: accessibilityControls,
       )));
 
   /// The layout-assist settings of the selected object drawable from `value.settings.object` directly.
@@ -180,21 +175,6 @@ extension PainterControllerHelper on PainterController {
           settings: value.settings.copyWith(
               object: value.settings.object.copyWith(
         layoutAssist: layoutAssist,
-      )));
-
-  /// The function used to decide whether to show scale and rotation object controls or not from `value.settings.object` directly.
-  ///
-  /// Setting this will notify all the listeners of this [PainterController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
-  /// this value should only be set between frames, e.g. in response to user
-  /// actions, not during the build, layout, or paint phases.
-  set showObjectScaleRotationControlsResolver(
-          ObjectShowScaleRotationControlsResolver
-              showScaleRotationControlsResolver) =>
-      value = value.copyWith(
-          settings: value.settings.copyWith(
-              object: value.settings.object.copyWith(
-        showScaleRotationControlsResolver: showScaleRotationControlsResolver,
       )));
 
   /// The text style to be used for text drawables from `value.settings.text` directly.
