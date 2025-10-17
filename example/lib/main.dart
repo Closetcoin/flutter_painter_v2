@@ -422,6 +422,8 @@ PainterController _usePainterController() => useRef(
           object: ObjectSettings(
             autoSelectAfterAdd: true,
             singleObjectMode: true,
+            showScaleRotationControlsResolver: () =>
+                true, // Enable corner controls
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,
               tapTargetSize: 4,

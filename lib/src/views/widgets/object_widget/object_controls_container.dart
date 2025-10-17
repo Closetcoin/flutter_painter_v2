@@ -4,9 +4,9 @@ import 'object_selection_indicator.dart';
 import 'object_scale_rotation_controls.dart';
 import 'object_stretch_controls.dart';
 import 'object_resize_controls.dart';
-import '../../controllers/drawables/object_drawable.dart';
-import '../../controllers/drawables/sized2ddrawable.dart';
-import '../../controllers/settings/object_settings.dart';
+import '../../../controllers/drawables/object_drawable.dart';
+import '../../../controllers/drawables/sized2ddrawable.dart';
+import '../../../controllers/settings/object_settings.dart';
 
 /// Container widget that renders all controls for a selected object.
 /// This includes selection indicator, scale/rotation controls, and optionally stretch or resize controls.

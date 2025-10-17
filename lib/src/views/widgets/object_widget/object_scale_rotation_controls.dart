@@ -39,28 +39,6 @@ class ObjectScaleRotationControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Top-left corner - scale control (index 0)
-        ObjectCornerControl(
-          position: CornerPosition.topLeft,
-          type: CornerControlType.scale,
-          stretchControlsExtension: stretchControlsExtension,
-          controlSize: controlSize,
-          isActive: controlsAreActive[0] ?? false,
-          onPanStart: (details) => onScalePanStart(0, details),
-          onPanUpdate: (details) => onScalePanUpdate(0, details),
-          onPanEnd: (details) => onScalePanEnd(0, details),
-        ),
-        // Bottom-left corner - scale control (index 1)
-        ObjectCornerControl(
-          position: CornerPosition.bottomLeft,
-          type: CornerControlType.scale,
-          stretchControlsExtension: stretchControlsExtension,
-          controlSize: controlSize,
-          isActive: controlsAreActive[1] ?? false,
-          onPanStart: (details) => onScalePanStart(1, details),
-          onPanUpdate: (details) => onScalePanUpdate(1, details),
-          onPanEnd: (details) => onScalePanEnd(1, details),
-        ),
         // Top-right corner - rotation control (index 2)
         ObjectCornerControl(
           position: CornerPosition.topRight,
@@ -75,7 +53,7 @@ class ObjectScaleRotationControls extends StatelessWidget {
           onPanUpdate: (details) => onRotationPanUpdate(2, details),
           onPanEnd: (details) => onRotationPanEnd(2, details),
         ),
-        // Bottom-right corner - scale control (index 3)
+        // Bottom-right corner - resize/scale control (index 3)
         ObjectCornerControl(
           position: CornerPosition.bottomRight,
           type: CornerControlType.scale,

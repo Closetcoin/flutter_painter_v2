@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../controllers/helpers/border_box_shadow.dart';
-import '../../controllers/helpers/renderer_check/renderer_check.dart';
-import '../../controllers/settings/settings.dart';
+import '../../../controllers/helpers/border_box_shadow.dart';
+import '../../../controllers/helpers/renderer_check/renderer_check.dart';
+import '../../../controllers/settings/settings.dart';
 
 /// Renders the selection indicator (border and shadow) around a selected object.
 class ObjectSelectionIndicator extends StatelessWidget {

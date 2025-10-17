@@ -1,4 +1,4 @@
-part of 'flutter_painter.dart';
+part of '../flutter_painter.dart';
 
 /// Flutter widget to move, scale and rotate [ObjectDrawable]s.
 ///
@@ -83,6 +83,11 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   Map<int, bool> controlsAreActive = {
     for (var e in List.generate(8, (index) => index)) e: false
   };
+
+  /// Keeps track of the initial local position when a control is clicked.
+  ///
+  /// This is used to calculate deltas for smooth scaling without jumps.
+  Map<int, Offset> controlInitialLocalPositions = {};
 
   /// Subscription to the events coming from the controller.
   StreamSubscription<PainterEvent>? controllerEventSubscription;
@@ -278,8 +283,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                   onScaleControlPanStart: (index, details) =>
                       onScaleControlPanStart(index, entry, details),
                   onScaleControlPanUpdate: (index, details) =>
-                      onScaleControlPanUpdate(entry, details, constraints,
-                          index == 0 || index == 1),
+                      onScaleControlPanUpdate(index, entry, details,
+                          constraints, index == 0 || index == 1),
                   onScaleControlPanEnd: (index, details) =>
                       onScaleControlPanEnd(index, entry, details),
                   // Rotation control callbacks
@@ -744,6 +749,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       MapEntry<int, ObjectDrawable> entry, DragStartDetails details) {
     setState(() {
       controlsAreActive[controlIndex] = true;
+      // Store the initial click position in the control's coordinate space
+      controlInitialLocalPositions[controlIndex] = details.localPosition;
     });
     onDrawableScaleStart(
         entry,
@@ -753,13 +760,25 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
         ));
   }
 
-  void onScaleControlPanUpdate(MapEntry<int, ObjectDrawable> entry,
-      DragUpdateDetails details, BoxConstraints constraints,
+  void onScaleControlPanUpdate(
+      int controlIndex,
+      MapEntry<int, ObjectDrawable> entry,
+      DragUpdateDetails details,
+      BoxConstraints constraints,
       [bool isReversed = true]) {
     final index = entry.key;
     final initial = initialScaleDrawables[index];
     if (initial == null) return;
-    final length = details.localPosition.dx * (isReversed ? -1 : 1);
+
+    // Get the initial click position on the control
+    final initialClickPos =
+        controlInitialLocalPositions[controlIndex] ?? Offset.zero;
+
+    // Calculate the delta from where you initially clicked
+    final delta = details.localPosition.dx - initialClickPos.dx;
+
+    // Use the delta as the length (how far you've dragged from the initial click)
+    final length = delta * (isReversed ? -1 : 1);
     final initialSize = initial.getSize(maxWidth: constraints.maxWidth);
     final initialLength = initialSize.width / 2;
     final double scale = initialLength == 0
@@ -779,6 +798,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       MapEntry<int, ObjectDrawable> entry, DragEndDetails details) {
     setState(() {
       controlsAreActive[controlIndex] = false;
+      // Clean up the stored initial position
+      controlInitialLocalPositions.remove(controlIndex);
     });
     onDrawableScaleEnd(entry);
   }

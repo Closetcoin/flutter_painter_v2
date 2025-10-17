@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'object_edge_control.dart';
-import '../../controllers/settings/settings.dart';
+import '../../../controllers/settings/settings.dart';
 
 /// Renders all 4 stretch controls for ImageDrawables.
 /// This eliminates the duplication of nearly identical code for each edge.

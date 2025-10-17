@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../controllers/drawables/object_drawable.dart';
-import '../../controllers/drawables/image_drawable.dart';
-import '../../controllers/settings/stretch_controls_settings.dart';
+import '../../../controllers/drawables/object_drawable.dart';
+import '../../../controllers/drawables/image_drawable.dart';
+import '../../../controllers/settings/stretch_controls_settings.dart';
 
 /// Centralizes all layout calculations for object drawables.
 /// This prevents repeated calculations and makes the layout logic easier to understand.

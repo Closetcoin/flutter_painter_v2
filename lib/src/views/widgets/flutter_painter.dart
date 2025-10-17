@@ -21,12 +21,12 @@ import '../../extensions/painter_controller_helper_extension.dart';
 import 'painter_controller_widget.dart';
 import 'dart:math' as math;
 // Extracted object widget components
-import 'object_layout_calculator.dart';
-import 'object_controls_container.dart';
+import 'object_widget/object_layout_calculator.dart';
+import 'object_widget/object_controls_container.dart';
 
 part 'free_style_widget.dart';
 part 'text_widget.dart';
-part 'object_widget_v2.dart';
+part 'object_widget/object_widget.dart';
 part 'shape_widget.dart';
 
 typedef DrawableCreatedCallback = Function(Drawable drawable);

@@ -35,7 +35,7 @@ class ObjectCornerControl extends StatelessWidget {
   double? get top {
     if (position == CornerPosition.topLeft ||
         position == CornerPosition.topRight) {
-      return stretchControlsExtension;
+      return 0.0; // Position at the outer edge of the container
     }
     return null;
   }
@@ -43,7 +43,7 @@ class ObjectCornerControl extends StatelessWidget {
   double? get bottom {
     if (position == CornerPosition.bottomLeft ||
         position == CornerPosition.bottomRight) {
-      return stretchControlsExtension;
+      return 0.0; // Position at the outer edge of the container
     }
     return null;
   }
@@ -51,7 +51,7 @@ class ObjectCornerControl extends StatelessWidget {
   double? get left {
     if (position == CornerPosition.topLeft ||
         position == CornerPosition.bottomLeft) {
-      return stretchControlsExtension;
+      return 0.0; // Position at the outer edge of the container
     }
     return null;
   }
@@ -59,7 +59,7 @@ class ObjectCornerControl extends StatelessWidget {
   double? get right {
     if (position == CornerPosition.topRight ||
         position == CornerPosition.bottomRight) {
-      return stretchControlsExtension;
+      return 0.0; // Position at the outer edge of the container
     }
     return null;
   }
