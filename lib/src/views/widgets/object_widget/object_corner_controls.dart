@@ -6,7 +6,7 @@ import '../../../controllers/settings/accessibility_controls_settings.dart';
 enum CornerPosition { topLeft, bottomLeft, topRight, bottomRight }
 
 /// Type of corner control
-enum CornerControlType { scale, rotation }
+enum CornerControlType { scale, rotation, remove }
 
 /// A corner control widget for scale or rotation operations.
 class ObjectCornerControl extends StatelessWidget {
@@ -80,6 +80,10 @@ class ObjectCornerControl extends StatelessWidget {
       return isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab;
     }
 
+    if (type == CornerControlType.remove) {
+      return SystemMouseCursors.click;
+    }
+
     // Scale cursors
     switch (position) {
       case CornerPosition.topLeft:
@@ -100,6 +104,8 @@ class ObjectCornerControl extends StatelessWidget {
         return Icons.refresh;
       case CornerControlType.scale:
         return Icons.zoom_out_map;
+      case CornerControlType.remove:
+        return Icons.close;
     }
   }
 
@@ -114,21 +120,33 @@ class ObjectCornerControl extends StatelessWidget {
       height: controlSize,
       child: MouseRegion(
         cursor: cursor,
-        child: GestureDetector(
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
-          child: customWidgetBuilder != null
-              ? customWidgetBuilder!(isActive) // Use custom widget if provided
-              : ObjectControlBox(
-                  // Default widget: circular with icon
-                  shape: BoxShape.circle,
-                  active: isActive,
-                  icon: icon,
-                  iconSize: controlSize *
-                      0.9, // Icon is 90% of control size (matches 18px icon with 20px control)
-                ),
-        ),
+        child: type == CornerControlType.remove
+            ? GestureDetector(
+                // Remove control uses tap gesture
+                onTap: () => onPanStart(DragStartDetails()),
+                child: customWidgetBuilder != null
+                    ? customWidgetBuilder!(isActive)
+                    : ObjectControlBox(
+                        shape: BoxShape.circle,
+                        active: isActive,
+                        icon: icon,
+                        iconSize: controlSize * 0.9,
+                      ),
+              )
+            : GestureDetector(
+                // Other controls use pan gestures
+                onPanStart: onPanStart,
+                onPanUpdate: onPanUpdate,
+                onPanEnd: onPanEnd,
+                child: customWidgetBuilder != null
+                    ? customWidgetBuilder!(isActive)
+                    : ObjectControlBox(
+                        shape: BoxShape.circle,
+                        active: isActive,
+                        icon: icon,
+                        iconSize: controlSize * 0.9,
+                      ),
+              ),
       ),
     );
   }

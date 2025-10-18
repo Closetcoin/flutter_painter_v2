@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'object_corner_controls.dart';
 import '../../../controllers/settings/accessibility_controls_settings.dart';
 
-/// Renders the corner controls for scaling and rotation.
+/// Renders the corner controls for scaling, rotation, and removal.
 class ObjectScaleRotationControls extends StatelessWidget {
   final double indicatorInset;
   final double controlSize;
@@ -12,8 +12,10 @@ class ObjectScaleRotationControls extends StatelessWidget {
   final int entryKey;
   final bool showRotationControl;
   final bool showScaleControl;
+  final bool showRemoveControl;
   final ControlWidgetBuilder? rotationControlBuilder;
   final ControlWidgetBuilder? scaleControlBuilder;
+  final ControlWidgetBuilder? removeControlBuilder;
   final void Function(int controlIndex, DragStartDetails details)
       onScalePanStart;
   final void Function(int controlIndex, DragUpdateDetails details)
@@ -25,6 +27,7 @@ class ObjectScaleRotationControls extends StatelessWidget {
       onRotationPanUpdate;
   final void Function(int controlIndex, DragEndDetails details)
       onRotationPanEnd;
+  final void Function()? onRemoveTap;
 
   const ObjectScaleRotationControls({
     Key? key,
@@ -36,20 +39,37 @@ class ObjectScaleRotationControls extends StatelessWidget {
     required this.entryKey,
     required this.showRotationControl,
     required this.showScaleControl,
+    required this.showRemoveControl,
     this.rotationControlBuilder,
     this.scaleControlBuilder,
+    this.removeControlBuilder,
     required this.onScalePanStart,
     required this.onScalePanUpdate,
     required this.onScalePanEnd,
     required this.onRotationPanStart,
     required this.onRotationPanUpdate,
     required this.onRotationPanEnd,
+    this.onRemoveTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // Top-left corner - remove control (index 8)
+        if (showRemoveControl && onRemoveTap != null)
+          ObjectCornerControl(
+            position: CornerPosition.topLeft,
+            type: CornerControlType.remove,
+            indicatorInset: indicatorInset,
+            controlSize: controlSize,
+            cornerOffset: cornerOffset,
+            isActive: false, // Remove control doesn't have active state
+            customWidgetBuilder: removeControlBuilder,
+            onPanStart: (details) => onRemoveTap!(), // Trigger removal on tap
+            onPanUpdate: (details) {}, // No-op for remove
+            onPanEnd: (details) {}, // No-op for remove
+          ),
         // Top-right corner - rotation control (index 2)
         if (showRotationControl)
           ObjectCornerControl(

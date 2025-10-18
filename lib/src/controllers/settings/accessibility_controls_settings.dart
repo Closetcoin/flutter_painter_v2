@@ -27,6 +27,12 @@ class AccessibilityControlsSettings {
   /// By default, this is `true` on desktop platforms and `false` on mobile platforms.
   final bool showScaleControl;
 
+  /// Whether to show the remove/delete control in the top-left corner.
+  /// This control allows deleting the selected object with a tap.
+  ///
+  /// Defaults to true.
+  final bool showRemoveControl;
+
   /// The size of the corner controls in logical pixels.
   /// This determines the width and height of the circular control buttons.
   ///
@@ -52,17 +58,24 @@ class AccessibilityControlsSettings {
   /// The builder receives [isActive] which is true when the control is being dragged.
   final ControlWidgetBuilder? scaleControlBuilder;
 
+  /// Optional custom widget builder for the remove control.
+  /// If provided, this widget will be used instead of the default circular icon button.
+  /// The builder receives [isActive] which is true when the control is being interacted with.
+  final ControlWidgetBuilder? removeControlBuilder;
+
   /// Creates an [AccessibilityControlsSettings] with the given values.
   ///
-  /// By default on desktop, both controls are shown.
+  /// By default on desktop, all controls are shown.
   /// On mobile, controls are hidden (pinch gestures preferred).
   const AccessibilityControlsSettings({
     this.showRotationControl = true,
     this.showScaleControl = true,
+    this.showRemoveControl = true,
     this.controlSize = 20.0,
     this.cornerOffset = 24.0,
     this.rotationControlBuilder,
     this.scaleControlBuilder,
+    this.removeControlBuilder,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -72,16 +85,20 @@ class AccessibilityControlsSettings {
   AccessibilityControlsSettings copyWith({
     bool? showRotationControl,
     bool? showScaleControl,
+    bool? showRemoveControl,
     double? controlSize,
     double? cornerOffset,
     ControlWidgetBuilder? rotationControlBuilder,
     ControlWidgetBuilder? scaleControlBuilder,
+    ControlWidgetBuilder? removeControlBuilder,
     bool clearRotationBuilder = false,
     bool clearScaleBuilder = false,
+    bool clearRemoveBuilder = false,
   }) {
     return AccessibilityControlsSettings(
       showRotationControl: showRotationControl ?? this.showRotationControl,
       showScaleControl: showScaleControl ?? this.showScaleControl,
+      showRemoveControl: showRemoveControl ?? this.showRemoveControl,
       controlSize: controlSize ?? this.controlSize,
       cornerOffset: cornerOffset ?? this.cornerOffset,
       rotationControlBuilder: clearRotationBuilder
@@ -90,6 +107,9 @@ class AccessibilityControlsSettings {
       scaleControlBuilder: clearScaleBuilder
           ? null
           : (scaleControlBuilder ?? this.scaleControlBuilder),
+      removeControlBuilder: clearRemoveBuilder
+          ? null
+          : (removeControlBuilder ?? this.removeControlBuilder),
     );
   }
 
@@ -99,6 +119,7 @@ class AccessibilityControlsSettings {
     return other is AccessibilityControlsSettings &&
         other.showRotationControl == showRotationControl &&
         other.showScaleControl == showScaleControl &&
+        other.showRemoveControl == showRemoveControl &&
         other.controlSize == controlSize &&
         other.cornerOffset == cornerOffset;
   }
@@ -107,6 +128,7 @@ class AccessibilityControlsSettings {
   int get hashCode => Object.hash(
         showRotationControl,
         showScaleControl,
+        showRemoveControl,
         controlSize,
         cornerOffset,
       );

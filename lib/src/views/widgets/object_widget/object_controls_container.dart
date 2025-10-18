@@ -22,6 +22,7 @@ class ObjectControlsContainer extends StatelessWidget {
   final int entryKey;
   final bool showRotationControl;
   final bool showScaleControl;
+  final bool showRemoveControl;
 
   // Callbacks for scale controls
   final void Function(int, DragStartDetails) onScaleControlPanStart;
@@ -32,6 +33,9 @@ class ObjectControlsContainer extends StatelessWidget {
   final void Function(int, DragStartDetails) onRotationControlPanStart;
   final void Function(int, DragUpdateDetails) onRotationControlPanUpdate;
   final void Function(int, DragEndDetails) onRotationControlPanEnd;
+
+  // Callback for remove control
+  final void Function()? onRemoveTap;
 
   // Callbacks for image stretch controls
   final void Function(int, DragStartDetails)? onImageStretchControlPanStart;
@@ -56,12 +60,14 @@ class ObjectControlsContainer extends StatelessWidget {
     required this.entryKey,
     required this.showRotationControl,
     required this.showScaleControl,
+    required this.showRemoveControl,
     required this.onScaleControlPanStart,
     required this.onScaleControlPanUpdate,
     required this.onScaleControlPanEnd,
     required this.onRotationControlPanStart,
     required this.onRotationControlPanUpdate,
     required this.onRotationControlPanEnd,
+    this.onRemoveTap,
     this.onImageStretchControlPanStart,
     this.onImageStretchControlPanUpdate,
     this.onImageStretchControlPanEnd,
@@ -100,7 +106,7 @@ class ObjectControlsContainer extends StatelessWidget {
 
           // Scale and rotation corner controls
           // Positioned at indicator corners + diagonal offset
-          if (showRotationControl || showScaleControl)
+          if (showRotationControl || showScaleControl || showRemoveControl)
             ObjectScaleRotationControls(
               indicatorInset: layout.maxControlsExtension,
               controlSize: controlsSize,
@@ -111,16 +117,20 @@ class ObjectControlsContainer extends StatelessWidget {
               entryKey: entryKey,
               showRotationControl: showRotationControl,
               showScaleControl: showScaleControl,
+              showRemoveControl: showRemoveControl,
               rotationControlBuilder:
                   settings.accessibilityControls.rotationControlBuilder,
               scaleControlBuilder:
                   settings.accessibilityControls.scaleControlBuilder,
+              removeControlBuilder:
+                  settings.accessibilityControls.removeControlBuilder,
               onScalePanStart: onScaleControlPanStart,
               onScalePanUpdate: onScaleControlPanUpdate,
               onScalePanEnd: onScaleControlPanEnd,
               onRotationPanStart: onRotationControlPanStart,
               onRotationPanUpdate: onRotationControlPanUpdate,
               onRotationPanEnd: onRotationControlPanEnd,
+              onRemoveTap: onRemoveTap,
             ),
 
           // Image stretch controls (only for ImageDrawable)

@@ -217,7 +217,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
       cornerControlsOffset:
           settings.accessibilityControls.cornerOffset / transformationScale,
       showCornerControls: settings.accessibilityControls.showRotationControl ||
-          settings.accessibilityControls.showScaleControl,
+          settings.accessibilityControls.showScaleControl ||
+          settings.accessibilityControls.showRemoveControl,
     );
 
     final contentWidget = SizedBox(
@@ -294,6 +295,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                       settings.accessibilityControls.showRotationControl,
                   showScaleControl:
                       settings.accessibilityControls.showScaleControl,
+                  showRemoveControl:
+                      settings.accessibilityControls.showRemoveControl,
                   // Scale control callbacks
                   onScaleControlPanStart: (index, details) =>
                       onScaleControlPanStart(index, entry, details),
@@ -310,6 +313,8 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                           entry, details, layout.contentSize),
                   onRotationControlPanEnd: (index, details) =>
                       onRotationControlPanEnd(index, entry, details),
+                  // Remove control callback
+                  onRemoveTap: () => controller?.removeDrawable(drawable),
                   // Image stretch control callbacks
                   onImageStretchControlPanStart: layout
                           .shouldRenderStretchControls
