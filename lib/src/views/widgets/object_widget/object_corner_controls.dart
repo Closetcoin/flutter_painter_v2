@@ -21,6 +21,7 @@ class ObjectCornerControl extends StatelessWidget {
   final void Function(DragStartDetails) onPanStart;
   final void Function(DragUpdateDetails) onPanUpdate;
   final void Function(DragEndDetails) onPanEnd;
+  final Future<void> Function()? onTap; // For remove control
 
   const ObjectCornerControl({
     Key? key,
@@ -35,6 +36,7 @@ class ObjectCornerControl extends StatelessWidget {
     required this.onPanStart,
     required this.onPanUpdate,
     required this.onPanEnd,
+    this.onTap,
   }) : super(key: key);
 
   double? get top {
@@ -120,10 +122,10 @@ class ObjectCornerControl extends StatelessWidget {
       height: controlSize,
       child: MouseRegion(
         cursor: cursor,
-        child: type == CornerControlType.remove
+        child: type == CornerControlType.remove && onTap != null
             ? GestureDetector(
-                // Remove control uses tap gesture
-                onTap: () => onPanStart(DragStartDetails()),
+                // Remove control uses tap gesture with async callback
+                onTap: onTap,
                 child: customWidgetBuilder != null
                     ? customWidgetBuilder!(isActive)
                     : ObjectControlBox(

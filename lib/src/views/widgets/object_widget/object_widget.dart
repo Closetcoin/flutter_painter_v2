@@ -314,7 +314,20 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
                   onRotationControlPanEnd: (index, details) =>
                       onRotationControlPanEnd(index, entry, details),
                   // Remove control callback
-                  onRemoveTap: () => controller?.removeDrawable(drawable),
+                  onRemoveTap: () async {
+                    final onRemoveTapped =
+                        settings.accessibilityControls.onRemoveTapped;
+                    if (onRemoveTapped != null) {
+                      // Call user's confirmation callback
+                      final shouldRemove = await onRemoveTapped();
+                      if (shouldRemove) {
+                        controller?.removeDrawable(drawable);
+                      }
+                    } else {
+                      // No callback provided, remove immediately
+                      controller?.removeDrawable(drawable);
+                    }
+                  },
                   // Image stretch control callbacks
                   onImageStretchControlPanStart: layout
                           .shouldRenderStretchControls

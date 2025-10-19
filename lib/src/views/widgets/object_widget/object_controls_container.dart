@@ -35,7 +35,7 @@ class ObjectControlsContainer extends StatelessWidget {
   final void Function(int, DragEndDetails) onRotationControlPanEnd;
 
   // Callback for remove control
-  final void Function()? onRemoveTap;
+  final Future<void> Function()? onRemoveTap;
 
   // Callbacks for image stretch controls
   final void Function(int, DragStartDetails)? onImageStretchControlPanStart;

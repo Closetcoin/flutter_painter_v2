@@ -49,7 +49,7 @@ class OutfitCreatorScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final painterSide = useState(0.0);
     final isRendering = useState(false);
-    final controller = _usePainterController();
+    final controller = _usePainterController(context);
     final canUndo = useListenableSelector(controller, () => controller.canUndo);
     final canRedo = useListenableSelector(controller, () => controller.canRedo);
     final canFlipSelected = useListenableSelector(
@@ -415,14 +415,39 @@ class _ExpandedSquare extends StatelessWidget {
   }
 }
 
-PainterController _usePainterController() => useRef(
+PainterController _usePainterController(BuildContext context) => useRef(
       PainterController(
         settings: PainterSettings(
           freeStyle: FreeStyleSettings(strokeWidth: 5),
           object: ObjectSettings(
             autoSelectAfterAdd: true,
             singleObjectMode: true,
-            accessibilityControls: AccessibilityControlsSettings(),
+            accessibilityControls: AccessibilityControlsSettings(
+                // onRemoveTapped: () async {
+                //   // Show confirmation dialog
+                //   return await showDialog<bool>(
+                //         context: context,
+                //         builder: (context) => AlertDialog(
+                //           title: Text('Delete object?'),
+                //           content: Text(
+                //               'Are you sure you want to delete this object?'),
+                //           actions: [
+                //             TextButton(
+                //               onPressed: () => Navigator.pop(context, false),
+                //               child: Text('Cancel'),
+                //             ),
+                //             TextButton(
+                //               onPressed: () => Navigator.pop(context, true),
+                //               style: TextButton.styleFrom(
+                //                   foregroundColor: Colors.red),
+                //               child: Text('Delete'),
+                //             ),
+                //           ],
+                //         ),
+                //       ) ??
+                //       false; // Return false if dialog is dismissed
+                // },
+                ),
             stretchControlsSettings: StretchControlsSettings(
               controlSize: 4.0,
               tapTargetSize: 4,

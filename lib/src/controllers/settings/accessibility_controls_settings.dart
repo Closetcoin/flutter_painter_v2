@@ -63,6 +63,35 @@ class AccessibilityControlsSettings {
   /// The builder receives [isActive] which is true when the control is being interacted with.
   final ControlWidgetBuilder? removeControlBuilder;
 
+  /// Optional async callback that is called when the remove control is tapped.
+  /// Should return `true` to confirm removal, or `false` to cancel.
+  ///
+  /// This allows showing a confirmation dialog before removing the object.
+  /// If not provided, the object will be removed immediately when tapped.
+  ///
+  /// Example:
+  /// ```dart
+  /// onRemoveTapped: () async {
+  ///   return await showDialog<bool>(
+  ///     context: context,
+  ///     builder: (context) => AlertDialog(
+  ///       title: Text('Delete object?'),
+  ///       actions: [
+  ///         TextButton(
+  ///           onPressed: () => Navigator.pop(context, false),
+  ///           child: Text('Cancel'),
+  ///         ),
+  ///         TextButton(
+  ///           onPressed: () => Navigator.pop(context, true),
+  ///           child: Text('Delete'),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   ) ?? false;
+  /// }
+  /// ```
+  final Future<bool> Function()? onRemoveTapped;
+
   /// Creates an [AccessibilityControlsSettings] with the given values.
   ///
   /// By default on desktop, all controls are shown.
@@ -76,12 +105,13 @@ class AccessibilityControlsSettings {
     this.rotationControlBuilder,
     this.scaleControlBuilder,
     this.removeControlBuilder,
+    this.onRemoveTapped,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
   ///
-  /// Note: To clear a widget builder, pass an explicit null-returning function.
-  /// To keep the existing builder, don't pass the parameter.
+  /// Note: To clear a widget builder or callback, use the clear* parameters.
+  /// To keep the existing builder/callback, don't pass the parameter.
   AccessibilityControlsSettings copyWith({
     bool? showRotationControl,
     bool? showScaleControl,
@@ -91,9 +121,11 @@ class AccessibilityControlsSettings {
     ControlWidgetBuilder? rotationControlBuilder,
     ControlWidgetBuilder? scaleControlBuilder,
     ControlWidgetBuilder? removeControlBuilder,
+    Future<bool> Function()? onRemoveTapped,
     bool clearRotationBuilder = false,
     bool clearScaleBuilder = false,
     bool clearRemoveBuilder = false,
+    bool clearRemoveCallback = false,
   }) {
     return AccessibilityControlsSettings(
       showRotationControl: showRotationControl ?? this.showRotationControl,
@@ -110,6 +142,8 @@ class AccessibilityControlsSettings {
       removeControlBuilder: clearRemoveBuilder
           ? null
           : (removeControlBuilder ?? this.removeControlBuilder),
+      onRemoveTapped:
+          clearRemoveCallback ? null : (onRemoveTapped ?? this.onRemoveTapped),
     );
   }
 

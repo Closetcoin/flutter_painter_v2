@@ -27,7 +27,7 @@ class ObjectScaleRotationControls extends StatelessWidget {
       onRotationPanUpdate;
   final void Function(int controlIndex, DragEndDetails details)
       onRotationPanEnd;
-  final void Function()? onRemoveTap;
+  final Future<void> Function()? onRemoveTap;
 
   const ObjectScaleRotationControls({
     Key? key,
@@ -66,7 +66,8 @@ class ObjectScaleRotationControls extends StatelessWidget {
             cornerOffset: cornerOffset,
             isActive: false, // Remove control doesn't have active state
             customWidgetBuilder: removeControlBuilder,
-            onPanStart: (details) => onRemoveTap!(), // Trigger removal on tap
+            onTap: onRemoveTap, // Async tap callback
+            onPanStart: (details) {}, // No-op for remove
             onPanUpdate: (details) {}, // No-op for remove
             onPanEnd: (details) {}, // No-op for remove
           ),
