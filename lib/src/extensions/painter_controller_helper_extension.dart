@@ -601,4 +601,124 @@ extension PainterControllerHelper on PainterController {
 
     if (groupedAction != null) performedActions.add(groupedAction);
   }
+
+  /// Snaps the currently selected object drawable to the nearest vertical snap line.
+  ///
+  /// This aligns the object's horizontal position (X) to either the canvas center or
+  /// the center of the nearest object, whichever is closer. The vertical position (Y)
+  /// is retained.
+  ///
+  /// Returns `true` if a drawable was selected and snapped successfully, `false` otherwise.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool snapSelectedToVertical() {
+    if (!hasSelectedDrawable) return false;
+    final selected = selectedObjectDrawable!;
+
+    // Get canvas center
+    final renderBox =
+        painterKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return false;
+
+    final canvasCenter = Offset(
+      renderBox.size.width / 2,
+      renderBox.size.height / 2,
+    );
+
+    // Find closest vertical target (X position)
+    double? closestX;
+    double closestDistance = double.infinity;
+
+    // Check canvas center
+    final distanceToCenter = (selected.position.dx - canvasCenter.dx).abs();
+    if (distanceToCenter < closestDistance) {
+      closestX = canvasCenter.dx;
+      closestDistance = distanceToCenter;
+    }
+
+    // Check other objects' centers
+    for (final drawable in drawables) {
+      if (drawable == selected || drawable is! ObjectDrawable) continue;
+
+      final distance = (selected.position.dx - drawable.position.dx).abs();
+      if (distance < closestDistance) {
+        closestX = drawable.position.dx;
+        closestDistance = distance;
+      }
+    }
+
+    // Snap to the closest target if found
+    if (closestX != null) {
+      replaceDrawable(
+        selected,
+        selected.copyWith(position: Offset(closestX, selected.position.dy)),
+      );
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Snaps the currently selected object drawable to the nearest horizontal snap line.
+  ///
+  /// This aligns the object's vertical position (Y) to either the canvas center or
+  /// the center of the nearest object, whichever is closer. The horizontal position (X)
+  /// is retained.
+  ///
+  /// Returns `true` if a drawable was selected and snapped successfully, `false` otherwise.
+  ///
+  /// Calling this will notify all the listeners of this [PainterController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  bool snapSelectedToHorizontal() {
+    if (!hasSelectedDrawable) return false;
+    final selected = selectedObjectDrawable!;
+
+    // Get canvas center
+    final renderBox =
+        painterKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return false;
+
+    final canvasCenter = Offset(
+      renderBox.size.width / 2,
+      renderBox.size.height / 2,
+    );
+
+    // Find closest horizontal target (Y position)
+    double? closestY;
+    double closestDistance = double.infinity;
+
+    // Check canvas center
+    final distanceToCenter = (selected.position.dy - canvasCenter.dy).abs();
+    if (distanceToCenter < closestDistance) {
+      closestY = canvasCenter.dy;
+      closestDistance = distanceToCenter;
+    }
+
+    // Check other objects' centers
+    for (final drawable in drawables) {
+      if (drawable == selected || drawable is! ObjectDrawable) continue;
+
+      final distance = (selected.position.dy - drawable.position.dy).abs();
+      if (distance < closestDistance) {
+        closestY = drawable.position.dy;
+        closestDistance = distance;
+      }
+    }
+
+    // Snap to the closest target if found
+    if (closestY != null) {
+      replaceDrawable(
+        selected,
+        selected.copyWith(position: Offset(selected.position.dx, closestY)),
+      );
+      return true;
+    }
+
+    return false;
+  }
 }

@@ -161,6 +161,20 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       TextButton(
+                        onPressed: hasSelectedDrawable
+                            ? () => controller.snapSelectedToVertical()
+                            : null,
+                        child: Text('Snap Vertical'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: hasSelectedDrawable
+                            ? () => controller.snapSelectedToHorizontal()
+                            : null,
+                        child: Text('Snap Horizontal'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
                         onPressed: canMoveSelectedBackward
                             ? () => controller.sendSelectedBackward()
                             : null,
