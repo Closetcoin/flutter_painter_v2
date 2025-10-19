@@ -422,6 +422,11 @@ PainterController _usePainterController(BuildContext context) => useRef(
           object: ObjectSettings(
             autoSelectAfterAdd: true,
             singleObjectMode: true,
+            layoutAssist: ObjectLayoutAssistSettings(
+              enabled: true,
+              positionalEnterDistance: 1.0,
+              positionalExitDistance: 15.0,
+            ),
             accessibilityControls: AccessibilityControlsSettings(
                 // onRemoveTapped: () async {
                 //   // Show confirmation dialog

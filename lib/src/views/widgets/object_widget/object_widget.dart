@@ -78,6 +78,15 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
     for (var e in ObjectDrawableAssist.values) e: <int>{}
   };
 
+  /// Keeps track of the snap target positions for horizontal and vertical assists.
+  ///
+  /// When snapping to canvas center, these will be the center coordinates.
+  /// When snapping to object centers, these will be the object center coordinates.
+  Map<ObjectDrawableAssist, double?> snapTargets = {
+    ObjectDrawableAssist.horizontal: null,
+    ObjectDrawableAssist.vertical: null,
+  };
+
   /// Keeps track of which controls are being used.
   ///
   /// Used to highlight the controls when they are in use.
@@ -496,14 +505,37 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
     // Clean up
     drawableInitialLocalFocalPoints.remove(index);
     initialScaleDrawables.remove(index);
+
+    // Remove assists from the selected object
     for (final assistSet in assistDrawables.values) {
       assistSet.remove(index);
     }
+
+    // Clear snap targets
+    snapTargets[ObjectDrawableAssist.horizontal] = null;
+    snapTargets[ObjectDrawableAssist.vertical] = null;
 
     // Remove any assist lines the object has
     final newDrawable = drawable.copyWith(assists: {});
 
     updateDrawable(drawable, newDrawable);
+
+    // Also remove assists from all other objects and update them
+    for (int i = 0; i < drawables.length; i++) {
+      if (i == index) continue;
+
+      final otherDrawable = drawables[i];
+      // Check if this object has any assists that need to be removed
+      if (otherDrawable.assists.isNotEmpty) {
+        final cleanedDrawable = otherDrawable.copyWith(assists: {});
+        updateDrawable(otherDrawable, cleanedDrawable);
+      }
+
+      // Remove from assist tracking
+      for (final assistSet in assistDrawables.values) {
+        assistSet.remove(i);
+      }
+    }
   }
 
   /// Callback when the object drawable is moved, scaled and/or rotated.
@@ -593,12 +625,16 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
     // So, rotational assist lines won't show if the user is only moving the object
     if (details.pointerCount < 2) assists.remove(ObjectDrawableAssist.rotation);
 
-    // Snap the object to the horizontal/vertical center if its is near it
+    // Snap the object to the horizontal/vertical snap targets if they exist
     // and layout assist is enabled
     final assistedPosition = Offset(
-      assists.contains(ObjectDrawableAssist.vertical) ? center.dx : position.dx,
-      assists.contains(ObjectDrawableAssist.horizontal)
-          ? center.dy
+      assists.contains(ObjectDrawableAssist.vertical) &&
+              snapTargets[ObjectDrawableAssist.vertical] != null
+          ? snapTargets[ObjectDrawableAssist.vertical]!
+          : position.dx,
+      assists.contains(ObjectDrawableAssist.horizontal) &&
+              snapTargets[ObjectDrawableAssist.horizontal] != null
+          ? snapTargets[ObjectDrawableAssist.horizontal]!
           : position.dy,
     );
 
@@ -635,42 +671,127 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
   /// Calculates whether the object entered or exited the horizontal and vertical assist areas.
   void calculatePositionalAssists(ObjectLayoutAssistSettings settings,
       int index, Offset position, Offset center) {
-    // Horizontal
-    //
-    // If the object is within the enter distance from the center dy and isn't marked
-    // as a drawable with a horizontal assist, mark it
-    if ((position.dy - center.dy).abs() < settings.positionalEnterDistance &&
-        !(assistDrawables[ObjectDrawableAssist.horizontal]?.contains(index) ??
-            false)) {
-      assistDrawables[ObjectDrawableAssist.horizontal]?.add(index);
-      settings.hapticFeedback.impact();
-    }
-    // Otherwise, if the object is outside the exit distance from the center dy and is marked as
-    // as a drawable with a horizontal assist, un-mark it
-    else if ((position.dy - center.dy).abs() >
-            settings.positionalExitDistance &&
-        (assistDrawables[ObjectDrawableAssist.horizontal]?.contains(index) ??
-            false)) {
-      assistDrawables[ObjectDrawableAssist.horizontal]?.remove(index);
+    // Track the closest horizontal and vertical snap targets
+    double? closestHorizontalTarget;
+    double? closestVerticalTarget;
+    double closestHorizontalDistance = double.infinity;
+    double closestVerticalDistance = double.infinity;
+
+    // Check if we're currently in assist mode for this object (for hysteresis)
+    final wasHorizontalAssist =
+        assistDrawables[ObjectDrawableAssist.horizontal]?.contains(index) ??
+            false;
+    final wasVerticalAssist =
+        assistDrawables[ObjectDrawableAssist.vertical]?.contains(index) ??
+            false;
+
+    // Determine the distance threshold to use (enter or exit for hysteresis)
+    final horizontalThreshold = wasHorizontalAssist
+        ? settings.positionalExitDistance
+        : settings.positionalEnterDistance;
+    final verticalThreshold = wasVerticalAssist
+        ? settings.positionalExitDistance
+        : settings.positionalEnterDistance;
+
+    // Check for canvas center snapping
+    final horizontalDistanceToCenter = (position.dy - center.dy).abs();
+    final verticalDistanceToCenter = (position.dx - center.dx).abs();
+
+    if (horizontalDistanceToCenter < horizontalThreshold) {
+      closestHorizontalTarget = center.dy;
+      closestHorizontalDistance = horizontalDistanceToCenter;
     }
 
-    // Vertical
-    //
-    // If the object is within the enter distance from the center dx and isn't marked
-    // as a drawable with a vertical assist, mark it
-    if ((position.dx - center.dx).abs() < settings.positionalEnterDistance &&
-        !(assistDrawables[ObjectDrawableAssist.vertical]?.contains(index) ??
-            false)) {
-      assistDrawables[ObjectDrawableAssist.vertical]?.add(index);
-      settings.hapticFeedback.impact();
+    if (verticalDistanceToCenter < verticalThreshold) {
+      closestVerticalTarget = center.dx;
+      closestVerticalDistance = verticalDistanceToCenter;
     }
-    // Otherwise, if the object is outside the exit distance from the center dx and is marked as
-    // as a drawable with a vertical assist, un-mark it
-    else if ((position.dx - center.dx).abs() >
-            settings.positionalExitDistance &&
-        (assistDrawables[ObjectDrawableAssist.vertical]?.contains(index) ??
-            false)) {
+
+    // Check for object center snapping (snap to other objects' centers)
+    for (int i = 0; i < drawables.length; i++) {
+      // Skip the current object being moved
+      if (i == index) continue;
+
+      final otherDrawable = drawables[i];
+      final otherPosition = otherDrawable.position;
+
+      // Check horizontal alignment (same Y position)
+      final horizontalDistance = (position.dy - otherPosition.dy).abs();
+      if (horizontalDistance < horizontalThreshold &&
+          horizontalDistance < closestHorizontalDistance) {
+        closestHorizontalTarget = otherPosition.dy;
+        closestHorizontalDistance = horizontalDistance;
+      }
+
+      // Check vertical alignment (same X position)
+      final verticalDistance = (position.dx - otherPosition.dx).abs();
+      if (verticalDistance < verticalThreshold &&
+          verticalDistance < closestVerticalDistance) {
+        closestVerticalTarget = otherPosition.dx;
+        closestVerticalDistance = verticalDistance;
+      }
+    }
+
+    // Horizontal assist handling
+    // Clear all horizontal assists from other objects
+    for (int i = 0; i < drawables.length; i++) {
+      if (i != index) {
+        assistDrawables[ObjectDrawableAssist.horizontal]?.remove(i);
+      }
+    }
+
+    if (closestHorizontalTarget != null) {
+      // Within threshold - activate snap and show assist lines
+      if (!wasHorizontalAssist) {
+        assistDrawables[ObjectDrawableAssist.horizontal]?.add(index);
+        settings.hapticFeedback.impact();
+      }
+
+      snapTargets[ObjectDrawableAssist.horizontal] = closestHorizontalTarget;
+
+      // Mark objects whose centers we're aligning with
+      for (int i = 0; i < drawables.length; i++) {
+        if (i == index) continue;
+        final otherDrawable = drawables[i];
+        if ((otherDrawable.position.dy - closestHorizontalTarget).abs() < 0.1) {
+          assistDrawables[ObjectDrawableAssist.horizontal]?.add(i);
+        }
+      }
+    } else {
+      // Beyond threshold - clear everything
+      assistDrawables[ObjectDrawableAssist.horizontal]?.remove(index);
+      snapTargets[ObjectDrawableAssist.horizontal] = null;
+    }
+
+    // Vertical assist handling
+    // Clear all vertical assists from other objects
+    for (int i = 0; i < drawables.length; i++) {
+      if (i != index) {
+        assistDrawables[ObjectDrawableAssist.vertical]?.remove(i);
+      }
+    }
+
+    if (closestVerticalTarget != null) {
+      // Within threshold - activate snap and show assist lines
+      if (!wasVerticalAssist) {
+        assistDrawables[ObjectDrawableAssist.vertical]?.add(index);
+        settings.hapticFeedback.impact();
+      }
+
+      snapTargets[ObjectDrawableAssist.vertical] = closestVerticalTarget;
+
+      // Mark objects whose centers we're aligning with
+      for (int i = 0; i < drawables.length; i++) {
+        if (i == index) continue;
+        final otherDrawable = drawables[i];
+        if ((otherDrawable.position.dx - closestVerticalTarget).abs() < 0.1) {
+          assistDrawables[ObjectDrawableAssist.vertical]?.add(i);
+        }
+      }
+    } else {
+      // Beyond exit distance - clear everything
       assistDrawables[ObjectDrawableAssist.vertical]?.remove(index);
+      snapTargets[ObjectDrawableAssist.vertical] = null;
     }
   }
 
