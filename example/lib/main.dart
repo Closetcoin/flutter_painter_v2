@@ -104,6 +104,10 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.isRemovingBackground,
     );
+    final cropMode = useListenableSelector(
+      controller,
+      () => controller.objectSettings.cropMode,
+    );
 
     final imagePickerNotifier = ref.read(appImagePickerProvider.notifier);
 
@@ -267,6 +271,20 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                           singleObjectMode
                               ? 'Single Object: ON'
                               : 'Single Object: OFF',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              cropMode ? Colors.orange.withOpacity(0.2) : null,
+                        ),
+                        onPressed: () => controller.objectSettings =
+                            controller.objectSettings.copyWith(
+                          cropMode: !cropMode,
+                        ),
+                        child: Text(
+                          cropMode ? 'Crop Mode: ON' : 'Crop Mode: OFF',
                         ),
                       ),
                       TextButton(

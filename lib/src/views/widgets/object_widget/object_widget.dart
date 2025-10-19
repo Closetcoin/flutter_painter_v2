@@ -1070,41 +1070,125 @@ class _ObjectWidgetState extends State<_ObjectWidget> {
         ((vertical ? details.localPosition.dy : details.localPosition.dx) *
             (isReversed ? -1 : 1));
 
-    // Calculate the new scale based on the drag distance for the specific axis
-    final initialSize = initial.getSize(maxWidth: constraints.maxWidth);
-    final initialLength = vertical ? initialSize.height : initialSize.width;
+    // Check if we're in crop mode
+    final cropMode = settings.cropMode;
 
-    final scaleFactor =
-        initialLength == 0 ? 1.0 : (length / initialLength + 1.0);
-    final newScaleFactor =
-        scaleFactor.clamp(ObjectDrawable.minScale, double.infinity);
+    if (cropMode) {
+      // CROP MODE: Modify crop values instead of scale
+      final imageSize = vertical ? initial.image.height : initial.image.width;
+      final currentScale = vertical ? initial.scaleY : initial.scaleX;
 
-    // Apply scaling only to the specific axis
-    final newScaleX =
-        vertical ? initial.scaleX : initial.scaleX * newScaleFactor;
-    final newScaleY =
-        vertical ? initial.scaleY * newScaleFactor : initial.scaleY;
+      // Calculate crop amount as a fraction of the image
+      final cropFraction = -length / (imageSize * currentScale);
 
-    // Calculate the new position to keep the opposite edge fixed
-    final offsetPosition = Offset(
-      vertical ? 0 : (isReversed ? -1 : 1) * length / 2,
-      vertical ? (isReversed ? -1 : 1) * length / 2 : 0,
-    );
+      // Apply crop to the appropriate edge
+      double newCropLeft = initial.cropLeft;
+      double newCropTop = initial.cropTop;
+      double newCropRight = initial.cropRight;
+      double newCropBottom = initial.cropBottom;
 
-    // Apply rotation transformation to the offset
-    final rotateOffset = Matrix4.identity()
-      ..rotateZ(initial.rotationAngle)
-      ..translate(offsetPosition.dx, offsetPosition.dy)
-      ..rotateZ(-initial.rotationAngle);
-    final position = Offset(rotateOffset[12], rotateOffset[13]);
+      if (vertical) {
+        if (isReversed) {
+          // Top edge
+          newCropTop = (initial.cropTop + cropFraction).clamp(0.0, 0.95);
+        } else {
+          // Bottom edge
+          newCropBottom = (initial.cropBottom + cropFraction).clamp(0.0, 0.95);
+        }
+      } else {
+        if (isReversed) {
+          // Left edge
+          newCropLeft = (initial.cropLeft + cropFraction).clamp(0.0, 0.95);
+        } else {
+          // Right edge
+          newCropRight = (initial.cropRight + cropFraction).clamp(0.0, 0.95);
+        }
+      }
 
-    final newDrawable = drawable.copyWith(
-      scaleX: newScaleX,
-      scaleY: newScaleY,
-      position: initial.position + position,
-    );
+      // Make sure we don't crop more than 95% total on any axis
+      if (vertical && (newCropTop + newCropBottom) > 0.95) {
+        return; // Prevent over-cropping
+      }
+      if (!vertical && (newCropLeft + newCropRight) > 0.95) {
+        return; // Prevent over-cropping
+      }
 
-    updateDrawable(drawable, newDrawable);
+      // Calculate position adjustment to keep the opposite edge fixed
+      // When we crop, the center of the visible area shifts, so we need to adjust position
+
+      // Calculate the shift in the center due to asymmetric cropping
+      final oldCenter = vertical
+          ? (initial.cropTop - initial.cropBottom)
+          : (initial.cropLeft - initial.cropRight);
+      final newCenter = vertical
+          ? (newCropTop - newCropBottom)
+          : (newCropLeft - newCropRight);
+
+      // The center shift in image coordinates
+      final centerShiftFraction = (newCenter - oldCenter) / 2;
+
+      // Convert to actual pixels (accounting for scale)
+      final centerShiftPixels = centerShiftFraction * imageSize * currentScale;
+
+      // Create offset in the appropriate direction
+      final offsetPosition = vertical
+          ? Offset(0, centerShiftPixels)
+          : Offset(centerShiftPixels, 0);
+
+      // Apply rotation transformation to the offset
+      final rotateOffset = Matrix4.identity()
+        ..rotateZ(initial.rotationAngle)
+        ..translate(offsetPosition.dx, offsetPosition.dy)
+        ..rotateZ(-initial.rotationAngle);
+      final positionAdjustment = Offset(rotateOffset[12], rotateOffset[13]);
+
+      final newDrawable = drawable.copyWith(
+        cropLeft: newCropLeft,
+        cropTop: newCropTop,
+        cropRight: newCropRight,
+        cropBottom: newCropBottom,
+        position: initial.position + positionAdjustment,
+      );
+
+      updateDrawable(drawable, newDrawable);
+    } else {
+      // STRETCH MODE: Original behavior
+      // Calculate the new scale based on the drag distance for the specific axis
+      final initialSize = initial.getSize(maxWidth: constraints.maxWidth);
+      final initialLength = vertical ? initialSize.height : initialSize.width;
+
+      final scaleFactor =
+          initialLength == 0 ? 1.0 : (length / initialLength + 1.0);
+      final newScaleFactor =
+          scaleFactor.clamp(ObjectDrawable.minScale, double.infinity);
+
+      // Apply scaling only to the specific axis
+      final newScaleX =
+          vertical ? initial.scaleX : initial.scaleX * newScaleFactor;
+      final newScaleY =
+          vertical ? initial.scaleY * newScaleFactor : initial.scaleY;
+
+      // Calculate the new position to keep the opposite edge fixed
+      final offsetPosition = Offset(
+        vertical ? 0 : (isReversed ? -1 : 1) * length / 2,
+        vertical ? (isReversed ? -1 : 1) * length / 2 : 0,
+      );
+
+      // Apply rotation transformation to the offset
+      final rotateOffset = Matrix4.identity()
+        ..rotateZ(initial.rotationAngle)
+        ..translate(offsetPosition.dx, offsetPosition.dy)
+        ..rotateZ(-initial.rotationAngle);
+      final position = Offset(rotateOffset[12], rotateOffset[13]);
+
+      final newDrawable = drawable.copyWith(
+        scaleX: newScaleX,
+        scaleY: newScaleY,
+        position: initial.position + position,
+      );
+
+      updateDrawable(drawable, newDrawable);
+    }
   }
 
   /// Image stretch control pan end handler

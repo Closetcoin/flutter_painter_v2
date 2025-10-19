@@ -51,6 +51,14 @@ class ObjectSettings {
   /// Settings for the selection indicator appearance and behavior.
   final SelectionIndicatorSettings selectionIndicatorSettings;
 
+  /// Whether crop mode is enabled for ImageDrawables.
+  ///
+  /// When `true`, stretch controls will crop the image instead of stretching it.
+  /// This allows users to crop images by dragging the edge controls.
+  ///
+  /// Defaults to `false`.
+  final bool cropMode;
+
   /// Creates a [ObjectSettings] with the given values.
   const ObjectSettings({
     this.layoutAssist = const ObjectLayoutAssistSettings(),
@@ -61,6 +69,7 @@ class ObjectSettings {
     this.smartCroppingSettings = const SmartCroppingSettings(),
     this.stretchControlsSettings = const StretchControlsSettings(),
     this.selectionIndicatorSettings = const SelectionIndicatorSettings(),
+    this.cropMode = false,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -73,6 +82,7 @@ class ObjectSettings {
     SmartCroppingSettings? smartCroppingSettings,
     StretchControlsSettings? stretchControlsSettings,
     SelectionIndicatorSettings? selectionIndicatorSettings,
+    bool? cropMode,
   }) {
     return ObjectSettings(
       layoutAssist: layoutAssist ?? this.layoutAssist,
@@ -88,6 +98,7 @@ class ObjectSettings {
           stretchControlsSettings ?? this.stretchControlsSettings,
       selectionIndicatorSettings:
           selectionIndicatorSettings ?? this.selectionIndicatorSettings,
+      cropMode: cropMode ?? this.cropMode,
     );
   }
 }

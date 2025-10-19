@@ -19,6 +19,16 @@ class ImageDrawable extends ObjectDrawable {
   /// The scale factor for the Y axis (height).
   final double scaleY;
 
+  /// Crop values as fractions of the image size (0.0 to 1.0).
+  /// cropLeft: fraction to crop from the left edge
+  /// cropTop: fraction to crop from the top edge
+  /// cropRight: fraction to crop from the right edge
+  /// cropBottom: fraction to crop from the bottom edge
+  final double cropLeft;
+  final double cropTop;
+  final double cropRight;
+  final double cropBottom;
+
   /// Creates an [ImageDrawable] with the given [image].
   ImageDrawable({
     required Offset position,
@@ -35,6 +45,10 @@ class ImageDrawable extends ObjectDrawable {
     required this.image,
     this.flipped = false,
     this.backgroundRemoved = false,
+    this.cropLeft = 0.0,
+    this.cropTop = 0.0,
+    this.cropRight = 0.0,
+    this.cropBottom = 0.0,
   })  : scaleX = scaleX ?? scale,
         scaleY = scaleY ?? scale,
         super(
@@ -65,6 +79,10 @@ class ImageDrawable extends ObjectDrawable {
     required Image image,
     bool flipped = false,
     bool backgroundRemoved = false,
+    double cropLeft = 0.0,
+    double cropTop = 0.0,
+    double cropRight = 0.0,
+    double cropBottom = 0.0,
   }) : this(
             position: position,
             rotationAngle: rotationAngle,
@@ -76,7 +94,11 @@ class ImageDrawable extends ObjectDrawable {
             hidden: hidden,
             locked: locked,
             eraseMask: eraseMask,
-            backgroundRemoved: backgroundRemoved);
+            backgroundRemoved: backgroundRemoved,
+            cropLeft: cropLeft,
+            cropTop: cropTop,
+            cropRight: cropRight,
+            cropBottom: cropBottom);
 
   /// Creates a copy of this but with the given fields replaced with the new values.
   @override
@@ -93,6 +115,10 @@ class ImageDrawable extends ObjectDrawable {
     bool? locked,
     List<List<Offset>>? eraseMask,
     bool? backgroundRemoved,
+    double? cropLeft,
+    double? cropTop,
+    double? cropRight,
+    double? cropBottom,
   }) {
     return ImageDrawable(
       hidden: hidden ?? this.hidden,
@@ -107,6 +133,10 @@ class ImageDrawable extends ObjectDrawable {
       locked: locked ?? this.locked,
       eraseMask: eraseMask ?? this.eraseMask,
       backgroundRemoved: backgroundRemoved ?? this.backgroundRemoved,
+      cropLeft: cropLeft ?? this.cropLeft,
+      cropTop: cropTop ?? this.cropTop,
+      cropRight: cropRight ?? this.cropRight,
+      cropBottom: cropBottom ?? this.cropBottom,
     );
   }
 
@@ -200,9 +230,24 @@ class ImageDrawable extends ObjectDrawable {
   /// Draws the image on the provided [canvas] of size [size].
   @override
   void drawObject(Canvas canvas, Size size) {
+    // Calculate the source rect based on crop values
+    final imageWidth = image.width.toDouble();
+    final imageHeight = image.height.toDouble();
+
+    final sourceRect = Rect.fromLTRB(
+      imageWidth * cropLeft,
+      imageHeight * cropTop,
+      imageWidth * (1.0 - cropRight),
+      imageHeight * (1.0 - cropBottom),
+    );
+
+    // Calculate the visible (cropped) dimensions
+    final croppedWidth = sourceRect.width;
+    final croppedHeight = sourceRect.height;
+
     final scaledSize = Offset(
-      image.width.toDouble() * scaleX,
-      image.height.toDouble() * scaleY,
+      croppedWidth * scaleX,
+      croppedHeight * scaleY,
     );
     final position = this.position.scale(flipped ? -1 : 1, 1);
 
@@ -211,12 +256,11 @@ class ImageDrawable extends ObjectDrawable {
       canvas.scale(-1, 1);
     }
 
-    // Draw the image onto the canvas.
+    // Draw the image onto the canvas using the cropped source rect
     // Use filterQuality for better rendering when scaling
     canvas.drawImageRect(
         image,
-        Rect.fromPoints(Offset.zero,
-            Offset(image.width.toDouble(), image.height.toDouble())),
+        sourceRect,
         Rect.fromPoints(position - scaledSize / 2, position + scaledSize / 2),
         Paint()..filterQuality = FilterQuality.high);
 
@@ -228,9 +272,13 @@ class ImageDrawable extends ObjectDrawable {
   /// Calculates the size of the rendered object.
   @override
   Size getSize({double minWidth = 0.0, double maxWidth = double.infinity}) {
+    // Account for crop when calculating size
+    final croppedWidth = image.width * (1.0 - cropLeft - cropRight);
+    final croppedHeight = image.height * (1.0 - cropTop - cropBottom);
+
     return Size(
-      image.width * scaleX,
-      image.height * scaleY,
+      croppedWidth * scaleX,
+      croppedHeight * scaleY,
     );
   }
 
