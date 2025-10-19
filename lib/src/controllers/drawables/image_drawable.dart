@@ -186,31 +186,67 @@ class ImageDrawable extends ObjectDrawable {
 
       // The erase paths are stored in object-local coordinates (unscaled, unrotated, unflipped)
       // We need to transform them to canvas coordinates using scaleX and scaleY
+      // and account for cropping
+
+      final imageWidth = image.width.toDouble();
+      final imageHeight = image.height.toDouble();
+
       for (final localErasePath in eraseMask) {
         if (localErasePath.length < 2) continue;
 
         final canvasPath = Path();
         bool firstPoint = true;
+        bool pathHasVisiblePoints = false;
 
         for (final localPoint in localErasePath) {
+          // Check if this point is within the cropped region
+          // localPoint is in image coordinates centered at (0,0)
+          // Convert to top-left origin for crop checking
+          final imageX = localPoint.dx + imageWidth / 2;
+          final imageY = localPoint.dy + imageHeight / 2;
+
+          // Check if point is in the cropped area
+          final isInCroppedArea = imageX >= (imageWidth * cropLeft) &&
+              imageX <= (imageWidth * (1.0 - cropRight)) &&
+              imageY >= (imageHeight * cropTop) &&
+              imageY <= (imageHeight * (1.0 - cropBottom));
+
+          if (!isInCroppedArea) {
+            // Point is cropped out, skip it but mark that we should break the path
+            if (!firstPoint) {
+              firstPoint = true; // Start a new path segment if we continue
+            }
+            continue;
+          }
+
+          // Adjust the local point to account for crop offset
+          // The visible area now starts at (cropLeft, cropTop) instead of (0, 0)
+          final adjustedLocalPoint = Offset(
+            localPoint.dx - (imageWidth * (cropLeft - cropRight) / 2),
+            localPoint.dy - (imageHeight * (cropTop - cropBottom) / 2),
+          );
+
           // Transform local point to canvas coordinates
           // Apply scaleX and scaleY for proper stretching support
           final flippedPosition = isFlipped ? position.scale(-1, 1) : position;
 
           final scaledPoint = Offset(
-            flippedPosition.dx + localPoint.dx * scaleX,
-            flippedPosition.dy + localPoint.dy * scaleY,
+            flippedPosition.dx + adjustedLocalPoint.dx * scaleX,
+            flippedPosition.dy + adjustedLocalPoint.dy * scaleY,
           );
 
           if (firstPoint) {
             canvasPath.moveTo(scaledPoint.dx, scaledPoint.dy);
             firstPoint = false;
+            pathHasVisiblePoints = true;
           } else {
             canvasPath.lineTo(scaledPoint.dx, scaledPoint.dy);
           }
         }
 
-        canvas.drawPath(canvasPath, erasePaint);
+        if (pathHasVisiblePoints) {
+          canvas.drawPath(canvasPath, erasePaint);
+        }
       }
 
       if (isFlipped) {
