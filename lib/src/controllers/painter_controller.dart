@@ -520,9 +520,15 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
         backgroundRemoved: true,
       );
 
-      // If smart cropping is enabled, apply crop properties
+      // Check if the image has already been cropped
+      final hasExistingCrop = selected.cropLeft > 0 ||
+          selected.cropTop > 0 ||
+          selected.cropRight > 0 ||
+          selected.cropBottom > 0;
+
+      // If smart cropping is enabled and no existing crop, apply crop properties
       // Note: Erase masks are properly handled - they get clipped to the cropped area
-      if (cropSettings.enabled) {
+      if (cropSettings.enabled && !hasExistingCrop) {
         // Calculate smart crop using the processed image
         final byteData = await processedImage.toByteData(
           format: ui.ImageByteFormat.png,
