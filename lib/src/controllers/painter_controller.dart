@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
@@ -53,6 +54,14 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
   ///
   /// This can be used in the UI to show loading indicators.
   bool get isRemovingBackground => _isRemovingBackground;
+
+  /// Whether the controller is currently performing smart crop on an image.
+  bool _isSmartCropping = false;
+
+  /// Whether the controller is currently performing smart crop on an image.
+  ///
+  /// This can be used in the UI to show loading indicators.
+  bool get isSmartCropping => _isSmartCropping;
 
   /// Whether the currently selected object has had its background removed.
   ///
@@ -558,6 +567,172 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
       _addAction(action, true);
     }
     return result;
+  }
+
+  /// Applies smart crop to the currently selected [ImageDrawable].
+  ///
+  /// Uses the same algorithm as background removal's smart crop, but instead of
+  /// physically cropping the image, it applies crop values to the drawable.
+  /// This allows undo/redo and properly handles erase masks.
+  ///
+  /// The crop finds the bounding box of opaque pixels and creates a square crop
+  /// centered on the subject with a margin.
+  ///
+  /// Settings are taken from [value.settings.object.smartCroppingSettings].
+  ///
+  /// Returns `true` if successfully applied, `false` if no [ImageDrawable] is selected
+  /// or smart crop detection fails.
+  Future<bool> smartCropSelected() async {
+    final selected = selectedObjectDrawable;
+    if (selected is! ImageDrawable) {
+      return false;
+    }
+
+    try {
+      _isSmartCropping = true;
+      notifyListeners();
+
+      // Get smart cropping settings
+      final cropSettings = value.settings.object.smartCroppingSettings;
+
+      // Convert image to bytes for analysis
+      final byteData = await selected.image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      if (byteData == null) return false;
+
+      final pngBytes = byteData.buffer.asUint8List();
+
+      // Calculate crop rect using the same logic as smart square crop
+      final cropRect = await _calculateSmartCropRect(
+        pngBytes: pngBytes,
+        alphaThreshold: cropSettings.alphaThreshold,
+        marginFrac: cropSettings.marginFrac,
+        minSidePx: cropSettings.minSidePx,
+        stride: cropSettings.stride,
+      );
+
+      if (cropRect == null) return false;
+
+      final imageWidth = selected.image.width.toDouble();
+      final imageHeight = selected.image.height.toDouble();
+
+      // Convert crop rect to fractions
+      final cropLeft = cropRect.left / imageWidth;
+      final cropTop = cropRect.top / imageHeight;
+      final cropRight = (imageWidth - cropRect.right) / imageWidth;
+      final cropBottom = (imageHeight - cropRect.bottom) / imageHeight;
+
+      // Apply crop values to the drawable
+      final croppedDrawable = selected.copyWith(
+        cropLeft: cropLeft,
+        cropTop: cropTop,
+        cropRight: cropRight,
+        cropBottom: cropBottom,
+      );
+
+      replaceDrawable(selected, croppedDrawable);
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      _isSmartCropping = false;
+      notifyListeners();
+    }
+  }
+
+  /// Calculates the smart crop rectangle for an image.
+  ///
+  /// Returns a [Rect] representing the crop area in pixel coordinates,
+  /// or null if detection fails.
+  Future<Rect?> _calculateSmartCropRect({
+    required Uint8List pngBytes,
+    required int alphaThreshold,
+    required double marginFrac,
+    required int minSidePx,
+    required int stride,
+  }) async {
+    try {
+      // Decode using dart:ui
+      final codec = await ui.instantiateImageCodec(pngBytes);
+      final frame = await codec.getNextFrame();
+      final decoded = frame.image;
+
+      final w = decoded.width;
+      final h = decoded.height;
+
+      // Get pixel data
+      final byteData = await decoded.toByteData();
+      if (byteData == null) return null;
+
+      // Find bbox of subject via alpha > threshold (strided for speed)
+      int minX = w, minY = h, maxX = -1, maxY = -1;
+      final clampedStride = stride.clamp(1, 8);
+
+      for (int y = 0; y < h; y += clampedStride) {
+        for (int x = 0; x < w; x += clampedStride) {
+          final offset = (y * w + x) * 4;
+          final alpha = byteData.getUint8(offset + 3);
+
+          if (alpha > alphaThreshold) {
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      // If nothing opaque found, return centered square
+      if (maxX < 0 || maxY < 0) {
+        final minSide = w < h ? w : h;
+        final side = minSide.clamp(minSidePx, minSide);
+        final cx = w ~/ 2;
+        final cy = h ~/ 2;
+        final half = side ~/ 2;
+        final left = (cx - half).clamp(0, w - side);
+        final top = (cy - half).clamp(0, h - side);
+
+        return Rect.fromLTWH(
+          left.toDouble(),
+          top.toDouble(),
+          side.toDouble(),
+          side.toDouble(),
+        );
+      }
+
+      // Subject bbox (tight)
+      final bboxW = maxX - minX + 1;
+      final bboxH = maxY - minY + 1;
+      final cx = (minX + maxX) ~/ 2;
+      final cy = (minY + maxY) ~/ 2;
+
+      // Square that contains the bbox + margin, centered on the bbox center
+      final bboxMax = bboxW > bboxH ? bboxW : bboxH;
+      int side = (bboxMax * (1.0 + marginFrac)).round();
+
+      // Respect min/max bounds
+      final maxSquare = w < h ? w : h;
+      if (side < minSidePx) side = minSidePx;
+      if (side > maxSquare) side = maxSquare;
+
+      // Place square centered on bbox center, then clamp into image bounds
+      int left = (cx - side / 2).floor();
+      int top = (cy - side / 2).floor();
+      if (left < 0) left = 0;
+      if (top < 0) top = 0;
+      if (left + side > w) left = w - side;
+      if (top + side > h) top = h - side;
+
+      return Rect.fromLTWH(
+        left.toDouble(),
+        top.toDouble(),
+        side.toDouble(),
+        side.toDouble(),
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Renders the background and all other drawables to a [ui.Image] object.

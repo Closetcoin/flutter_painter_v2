@@ -104,6 +104,10 @@ class OutfitCreatorScreen extends HookConsumerWidget {
       controller,
       () => controller.isRemovingBackground,
     );
+    final isSmartCropping = useListenableSelector(
+      controller,
+      () => controller.isSmartCropping,
+    );
     final cropMode = useListenableSelector(
       controller,
       () => controller.objectSettings.cropMode,
@@ -176,6 +180,25 @@ class OutfitCreatorScreen extends HookConsumerWidget {
                             ? () => controller.snapSelectedToHorizontal()
                             : null,
                         child: Text('Snap Horizontal'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: isSmartCropping
+                              ? Colors.blue.withValues(alpha: 0.2)
+                              : null,
+                        ),
+                        onPressed: isSmartCropping || !hasSelectedDrawable
+                            ? null
+                            : () => controller.smartCropSelected(),
+                        child: isSmartCropping
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Smart Crop'),
                       ),
                       const SizedBox(width: 8),
                       TextButton(
