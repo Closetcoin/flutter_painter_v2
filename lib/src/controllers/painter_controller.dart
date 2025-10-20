@@ -497,18 +497,15 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
       final bgSettings = value.settings.object.backgroundRemoverSettings;
       final cropSettings = value.settings.object.smartCroppingSettings;
 
-      // If the object has erase masks, don't apply crop to preserve the erased areas
-      final shouldApplyCrop =
-          cropSettings.enabled && selected.eraseMask.isEmpty;
-
-      // Call the background remover utility
+      // Call the background remover utility (without physical crop)
       final processedImage = await BackgroundRemoverUtil.removeBackground(
         inputImage: selected.image,
         threshold: bgSettings.threshold,
         smoothMask: bgSettings.smoothMask,
         enhanceEdges: bgSettings.enhanceEdges,
         padPx: bgSettings.padPx,
-        applyCrop: shouldApplyCrop,
+        applyCrop:
+            false, // Don't physically crop - we'll use crop properties instead
         alphaThreshold: cropSettings.alphaThreshold,
         marginFrac: cropSettings.marginFrac,
         minSidePx: cropSettings.minSidePx,
@@ -518,10 +515,50 @@ class PainterController extends ValueNotifier<PainterControllerValue> {
       // Create a new drawable with the processed image
       // Keep all the same properties (position, scale, rotation, etc.)
       // Set backgroundRemoved flag to true
-      final processedDrawable = selected.copyWith(
+      ImageDrawable processedDrawable = selected.copyWith(
         image: processedImage,
         backgroundRemoved: true,
       );
+
+      // If smart cropping is enabled, apply crop properties
+      // Note: Erase masks are properly handled - they get clipped to the cropped area
+      if (cropSettings.enabled) {
+        // Calculate smart crop using the processed image
+        final byteData = await processedImage.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
+
+        if (byteData != null) {
+          final pngBytes = byteData.buffer.asUint8List();
+
+          final cropRect = await _calculateSmartCropRect(
+            pngBytes: pngBytes,
+            alphaThreshold: cropSettings.alphaThreshold,
+            marginFrac: cropSettings.marginFrac,
+            minSidePx: cropSettings.minSidePx,
+            stride: cropSettings.stride,
+          );
+
+          if (cropRect != null) {
+            final imageWidth = processedImage.width.toDouble();
+            final imageHeight = processedImage.height.toDouble();
+
+            // Convert crop rect to fractions
+            final cropLeft = cropRect.left / imageWidth;
+            final cropTop = cropRect.top / imageHeight;
+            final cropRight = (imageWidth - cropRect.right) / imageWidth;
+            final cropBottom = (imageHeight - cropRect.bottom) / imageHeight;
+
+            // Apply crop values to the drawable
+            processedDrawable = processedDrawable.copyWith(
+              cropLeft: cropLeft,
+              cropTop: cropTop,
+              cropRight: cropRight,
+              cropBottom: cropBottom,
+            );
+          }
+        }
+      }
 
       // Use the RemoveBackgroundAction for undo/redo support
       final action = RemoveBackgroundAction(selected, processedDrawable);
