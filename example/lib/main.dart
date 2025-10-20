@@ -458,6 +458,7 @@ PainterController _usePainterController(BuildContext context) => useRef(
               enabled: true,
               positionalEnterDistance: 1.0,
               positionalExitDistance: 15.0,
+              snapTarget: SnapTarget.closest,
             ),
             accessibilityControls: AccessibilityControlsSettings(
                 // onRemoveTapped: () async {

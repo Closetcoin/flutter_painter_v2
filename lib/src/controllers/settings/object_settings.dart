@@ -103,6 +103,15 @@ class ObjectSettings {
   }
 }
 
+/// Defines what target to snap to when using programmatic snap functions.
+enum SnapTarget {
+  /// Snap to the closest available snap line (canvas center or object centers).
+  closest,
+
+  /// Snap only to the canvas center, ignoring other objects.
+  center,
+}
+
 /// Represents settings that control the behavior of layout assist for objects.
 ///
 /// Layout assist helps in arranging objects by snapping them to common arrangements
@@ -151,6 +160,14 @@ class ObjectLayoutAssistSettings {
   /// When the object is this angle far from an assist angle, it leaves layout assist.
   final double rotationalExitAngle;
 
+  /// What target to snap to when using programmatic snap functions (snapSelectedToVertical/snapSelectedToHorizontal).
+  ///
+  /// - [SnapTarget.closest]: Snap to the nearest snap line (canvas center or object centers)
+  /// - [SnapTarget.center]: Snap only to canvas center, ignoring other objects
+  ///
+  /// Defaults to [SnapTarget.center].
+  final SnapTarget snapTarget;
+
   /// Creates an [ObjectLayoutAssistSettings].
   const ObjectLayoutAssistSettings({
     this.enabled = true,
@@ -159,6 +176,7 @@ class ObjectLayoutAssistSettings {
     this.positionalExitDistance = defaultPositionalExitDistance,
     this.rotationalEnterAngle = defaultRotationalEnterAngle,
     this.rotationalExitAngle = defaultRotationalExitAngle,
+    this.snapTarget = SnapTarget.center,
   });
 
   /// Creates a copy of this but with the given fields replaced with the new values.
@@ -169,6 +187,7 @@ class ObjectLayoutAssistSettings {
     double? positionalExitDistance,
     double? rotationalEnterAngle,
     double? rotationalExitAngle,
+    SnapTarget? snapTarget,
   }) {
     return ObjectLayoutAssistSettings(
       enabled: enabled ?? this.enabled,
@@ -179,6 +198,7 @@ class ObjectLayoutAssistSettings {
           positionalExitDistance ?? this.positionalExitDistance,
       rotationalEnterAngle: rotationalEnterAngle ?? this.rotationalEnterAngle,
       rotationalExitAngle: rotationalExitAngle ?? this.rotationalExitAngle,
+      snapTarget: snapTarget ?? this.snapTarget,
     );
   }
 }
